@@ -54,3 +54,26 @@ export const filterInfluencers = query({
     return influencers;
   }
 });
+
+
+export const listInfluencers = query({
+      args: {}, // Add filters later: niche, location, etc.
+      handler: async (ctx) => {
+        const influencers = await ctx.db
+          .query("profiles")
+          .filter((q) => q.eq(q.field("role"), "influencer"))
+          .collect();
+        return influencers;
+      },
+});
+
+// export const getInfluencerProfileByUserId = query({
+//   args: { userId: v.id("users") },
+//   handler: async (ctx, { userId }) => {
+//     const profile = await ctx.db
+//       .query("profiles")
+//       .withIndex("by_userId", (q) => q.eq("userId", userId))
+//       .unique();
+//     return profile;
+//   },
+// });

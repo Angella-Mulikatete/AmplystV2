@@ -74,8 +74,54 @@ import { mutation, query } from "./_generated/server";
   });
 
   export const getCampaignDetails = query({
-      args: { campaignId: v.id("campaigns") },
-      handler: async (ctx, args): Promise<Doc<"campaigns"> | null> => {
-        return await ctx.db.get(args.campaignId);
-      },
+    args: { campaignId: v.id("campaigns") },
+    handler: async (ctx, args): Promise<Doc<"campaigns"> | null> => {
+      return await ctx.db.get(args.campaignId);
+    },
+  });
+
+  export const allCampaigns = query({
+    handler: async (ctx) => {
+      return await ctx.db.query("campaigns").collect();
+    }
+  });
+
+  
+  export const campaignsForInfluencer = query({
+    handler: async (ctx) => {
+      const userId = await getAuthUserId(ctx);
+      if (!userId) return [];
+      // Assuming you have a campaignApplications table:
+      const applications = await ctx.db.query("campaignApplications")
+        .withIndex("by_influencerUserId", q => q.eq("influencerUserId", userId))
+        .collect();
+      const campaignIds = applications.map(app => app.campaignId);
+      if (campaignIds.length === 0) {
+        return []; // No campaign IDs, so no campaigns to return
+      }
+      return await ctx.db.query("campaigns")
+        .filter(q => q.or(...campaignIds.map(id => q.eq(q.field("_id"), id))))
+        .collect();
+    }
+  });
+
+
+  export const activeForInfluencer = query({
+    handler: async (ctx) => {
+      const userId = await getAuthUserId(ctx);
+      if (!userId) return [];
+      // Fetch applications where this influencer is 'active' (customize status as needed)
+      const activeApplications = await ctx.db
+        .query("campaignApplications")
+        .withIndex("by_influencerUserId", q => q.eq("influencerUserId", userId))
+        .filter(q => q.eq(q.field("status"), "active")) // or "accepted", depending on your schema
+        .collect();
+      const campaignIds = activeApplications.map(app => app.campaignId);
+      if (campaignIds.length === 0) return [];
+      // Fetch campaign details for these IDs
+      return await ctx.db
+        .query("campaigns")
+        .filter(q => q.or(...campaignIds.map(id => q.eq(q.field("_id"), id))))
+        .collect();
+    }
   });

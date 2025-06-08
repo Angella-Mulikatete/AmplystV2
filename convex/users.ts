@@ -5,7 +5,7 @@ import { Doc, Id } from "./_generated/dataModel";
 import bcrypt from "bcryptjs";
 import { api } from "./_generated/api";
 
-// Query to get the current user's profile
+
 export const getMyProfile = query({
   handler: async (ctx): Promise<Doc<"profiles"> | null> => {
     const userId = await getAuthUserId(ctx);
@@ -20,78 +20,6 @@ export const getMyProfile = query({
   },
 });
 
-// convex/profiles.ts
-// export const insertProfile = mutation({
-//   args: {
-//     role: v.union(
-//       v.literal("influencer"),
-//       v.literal("brand"),
-//       v.literal("agency"),
-//     ),
-//     name: v.string(),
-//     bio: v.optional(v.string()),
-//     profilePictureUrl: v.optional(v.string()),
-//     niche: v.optional(v.string()),
-//     location: v.optional(v.string()),
-//     followerCount: v.optional(v.string()),
-//     socialAccounts: v.optional(
-//       v.object({
-//         instagram: v.string(),
-//         tiktok: v.string(),
-//         youtube: v.string(),
-//         twitter: v.string(),
-//       })
-//     ),
-//     portfolio: v.optional(v.array(v.any())),
-//   },
-//   handler: async (ctx, args) => {
-//     try {
-//       console.log("Inserting profile with args:", args);
-//     // 1. Get Clerk auth identity
-//     const identity = await ctx.auth.getUserIdentity();
-//     if (!identity) throw new Error("User not authenticated");
-
-//     console.log("User identity:", identity);
-
-//     // 2. Check if user exists in your users table
-//     const user = await ctx.db
-//       .query("users")
-//       .withIndex("by_token", q => 
-//         q.eq("tokenIdentifier", identity.tokenIdentifier)
-//       )
-//       .unique();
-
-//     // 3. If user doesn't exist, create them first
-//     if (!user) {
-//       await ctx.db.insert("users", {
-//         tokenIdentifier: identity.tokenIdentifier,
-//         email: identity.email!,
-//         role: args.role,
-//       });
-//     }
-
-//     // 4. Now handle profile creation/update
-//     const existingProfile = await ctx.db
-//       .query("profiles")
-//       .withIndex("by_userId", q => 
-//         q.eq("userId", user!._id) // user is guaranteed to exist now
-//       )
-//       .unique();
-
-//     if (existingProfile) {
-//       await ctx.db.patch(existingProfile._id, args);
-//       return existingProfile._id;
-//     } else {
-//       return await ctx.db.insert("profiles", {
-//         userId: user!._id,
-//         ...args
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Error inserting profile:", error);
-//   }
-// },
-// });
 
 export const insertProfile = mutation({
   args: {
@@ -218,18 +146,6 @@ export const createOrGetUser = mutation({
   },
 });
 
-export const listInfluencers = query({
-      args: {}, // Add filters later: niche, location, etc.
-      handler: async (ctx) => {
-        const influencers = await ctx.db
-          .query("profiles")
-          .filter((q) => q.eq(q.field("role"), "influencer"))
-          .collect();
-        return influencers;
-      },
-});
-
-
 export const getInfluencerProfile = query({
   args: {},
   handler: async (ctx) => {
@@ -292,7 +208,6 @@ export const hasCompletedOnboarding = query({
 });
 
 
-
 export const checkInfluencerProfile = mutation({
   args: { identifier: v.string() }, // username or email
   handler: async (ctx, { identifier }) => {
@@ -317,8 +232,6 @@ export const checkInfluencerProfile = mutation({
     return !!profile;
   }
 });
-
-
 
 export const getUserByIdentifier = query({
   args: { identifier: v.string() },
@@ -347,3 +260,5 @@ export const getUserRoleByIdentifier = action({
     return { role: user.role, exists: true };
   },
 });
+
+

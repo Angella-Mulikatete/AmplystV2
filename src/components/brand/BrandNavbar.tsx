@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Search, Bell, User, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 const BrandNavbar = () => {
   const navigate = useNavigate();
@@ -12,10 +13,11 @@ const BrandNavbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900 font-poppins">Amplyst</span>
+            <img 
+              src="/src/assets/logo.png"  // or logo.png
+              alt="Amplyst Logo"
+              className="w-30 h-8 object-contain"  // maintains aspect ratio
+              />
           </div>
 
           {/* Navigation Links */}
@@ -62,6 +64,11 @@ const BrandNavbar = () => {
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5 text-gray-600" />
             </Button>
+          </div>
+          <div className="flex items-center space-x-4">
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
           </div>
         </div>
       </div>

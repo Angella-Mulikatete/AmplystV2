@@ -86,7 +86,9 @@ const applicationTables = {
     status: v.string(), // "pending", "accepted", "rejected", etc.
     pitch: v.optional(v.string()),
     createdAt: v.string(),
-  }).index("by_campaignId", ["campaignId"]),
+  })
+  .index("by_campaignId", ["campaignId"])
+  .index("by_influencerUserId", ["influencerUserId"]),
 
   // Messaging
   messages :defineTable({

@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 
 const niches = ["Fashion", "Tech", "Fitness", "Beauty", "Travel"];
 const locations = ["Uganda", "UK", "Germany", "Kenya", "Nigeria"];
 
 export default function InfluencerDiscovery() {
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [profileIdToLoad, setProfileIdToLoad] = useState(null); // New state to trigger profile fetch
   const [filters, setFilters] = useState({
     niche: "",
     minFollowers: "",
@@ -28,6 +32,23 @@ export default function InfluencerDiscovery() {
     sortOrder: filters.sortOrder,
   });
 
+  // const fetchedProfileData = useQuery( // Renamed to avoid confusion
+  //     api.influencers.getInfluencerProfileByUserId,
+  //     profileIdToLoad ? { userId: profileIdToLoad } : null // Query runs when profileIdToLoad is set
+  // );
+
+  // useEffect(() => { // Effect to update selectedProfile when fetched data is ready
+  //   if (fetchedProfileData) {
+  //     setSelectedProfile(fetchedProfileData);
+  //   }
+  // }, [fetchedProfileData]);
+  
+  // const handleViewProfile = async (userId) => {
+  //   setProfileIdToLoad(userId); // Trigger the query by setting the ID
+  //   // selectedProfile will be updated by the useEffect when fetchedProfileData is available
+  // };
+
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Discover Influencers</h2>
@@ -40,7 +61,7 @@ export default function InfluencerDiscovery() {
             <SelectValue placeholder="All Niches" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={undefined}>All Niches</SelectItem> {/* Use undefined for "All" */}
+            <SelectItem value={undefined}>All Niches</SelectItem>
             {niches.map(niche => <SelectItem key={niche} value={niche}>{niche}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -64,7 +85,7 @@ export default function InfluencerDiscovery() {
             <SelectValue placeholder="All Locations" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={undefined}>All Locations</SelectItem> {/* Use undefined for "All" */}
+            <SelectItem value={undefined}>All Locations</SelectItem>
             {locations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -101,7 +122,10 @@ export default function InfluencerDiscovery() {
                 </div>
               </div>
               <div className="mt-3">
-                <Button size="sm" variant="outline">View Profile</Button>
+                <Button size="sm" 
+                  variant="outline" 
+                  // onClick={() => handleViewProfile(influencer.userId)}
+                >View Profile</Button>
                 <Button size="sm" className="ml-2">Invite to Campaign</Button>
               </div>
             </CardContent>
@@ -111,6 +135,41 @@ export default function InfluencerDiscovery() {
       {influencers && influencers.length === 0 && (
         <div className="text-gray-500 text-center py-8">No influencers match your filters.</div>
       )}
+
+      {/* Profile Modal */}
+      {/* <Dialog open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedProfile?.name || "Influencer Profile"}</DialogTitle>
+          </DialogHeader>
+          {selectedProfile ? (
+            <div>
+              <img src={selectedProfile.profilePictureUrl} alt={selectedProfile.name} className="w-24 h-24 rounded-full mb-4" />
+              <p><strong>Bio:</strong> {selectedProfile.bio}</p>
+              <p><strong>Niche:</strong> {selectedProfile.niche}</p>
+              <p><strong>Location:</strong> {selectedProfile.location}</p>
+              <p><strong>Followers:</strong> {selectedProfile.followerCount}</p>
+
+              <h4 className="mt-4 font-semibold">Portfolio</h4>
+              {selectedProfile.portfolio?.length ? (
+                <ul className="list-disc pl-5">
+                  {selectedProfile.portfolio.map((item, idx) => (
+                    <li key={idx}>
+                      <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                        {item.title}
+                      </a> - {item.description}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No portfolio items available.</p>
+              )}
+            </div>
+          ) : (
+            <p>Loading profile...</p>
+          )}
+        </DialogContent>
+      </Dialog> */}
     </div>
   );
 }
