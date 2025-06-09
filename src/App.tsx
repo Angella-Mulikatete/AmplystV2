@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import InfluencerDashboard from "./pages/InfluencerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import BrandOnboarding from "./pages/BrandOnboarding";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/onboarding/influencer" element={<InfluencerOnboarding />} />
-           <Route path="/onboarding/brand" element={<CampaignCreation />} />
+           <Route path="/onboarding/brand" element={<BrandOnboarding />} />
+           {/* <Route path="/onboarding/brand" element={<CampaignCreation />} /> */}
           <Route path="/brand/dashboard" element={<BrandDashboard />} />
           <Route path="/brand/campaigns/create" element={<CampaignCreation />} />
           <Route path="/brand/discover" element={<InfluencerDiscovery />} />

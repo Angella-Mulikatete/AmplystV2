@@ -131,6 +131,16 @@ const applicationTables = {
     website: v.optional(v.string()),
     industry: v.optional(v.string()),
     description: v.optional(v.string()),
+    contactPerson: v.optional(v.string()), // Added contactPerson
+    businessEmail: v.optional(v.string()), // Added businessEmail
+    location: v.optional(v.string()), // Added location
+    campaignGoal: v.optional(v.string()),
+    targetAudience: v.optional(v.string()),
+    influencerType: v.optional(v.string()),
+    influencerNiche: v.optional(v.string()), // Added missing field
+    budgetRange: v.optional(v.string()),
+    contentType: v.optional(v.string()), // Added missing field
+    campaignDescription: v.optional(v.string()), // Added missing field
   }).index("by_userId", ["userId"])
 
 };
