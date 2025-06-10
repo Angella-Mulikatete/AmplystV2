@@ -137,10 +137,10 @@ const applicationTables = {
     campaignGoal: v.optional(v.string()),
     targetAudience: v.optional(v.string()),
     influencerType: v.optional(v.string()),
-    influencerNiche: v.optional(v.string()), // Added missing field
+    influencerNiche: v.optional(v.string()),
     budgetRange: v.optional(v.string()),
-    contentType: v.optional(v.string()), // Added missing field
-    campaignDescription: v.optional(v.string()), // Added missing field
+    contentType: v.optional(v.string()),
+    campaignDescription: v.optional(v.string()),
   }).index("by_userId", ["userId"])
 
 };

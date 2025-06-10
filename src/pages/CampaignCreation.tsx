@@ -81,7 +81,7 @@ export default function CampaignCreation() {
 
     await createCampaign(campaignData);
     setLoading(false);
-    navigate("/brand/dashboard");
+    // navigate("/brand/dashboard");
   };
 
   return (
