@@ -21,23 +21,24 @@ export default function BrandDashboard() {
   const [loadingMatch, setLoadingMatch] = useState(null);
 
   // Helper: Call your AI server for influencer matching
-  async function fetchMatchedInfluencers(campaign, influencers) {
-    const response = await fetch("http://localhost:3001/api/ai-match", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ campaign, influencers }),
-    });
-    const data = await response.json();
-    return data.influencerIds || [];
-  }
+  // async function fetchMatchedInfluencers(campaign, influencers) {
+  //   const response = await fetch("http://localhost:3001/api/ai-match", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ campaign, influencers }),
+  //   });
+  //   const data = await response.json();
+  //   return data.influencerIds || [];
+  // }
 
   // Handle AI matching for a campaign
-  const handleMatchClick = async (campaign) => {
-    setLoadingMatch(campaign._id);
-    const ids = await fetchMatchedInfluencers(campaign, influencers);
-    setMatchedInfluencersMap((prev) => ({ ...prev, [campaign._id]: ids }));
-    setLoadingMatch(null);
-  };
+  // const handleMatchClick = async (campaign) => {
+  //   setLoadingMatch(campaign._id);
+  //   const ids = await fetchMatchedInfluencers(campaign, influencers);
+  //   console.log("Matched Influencers IDs:", ids);
+  //   setMatchedInfluencersMap((prev) => ({ ...prev, [campaign._id]: ids }));
+  //   setLoadingMatch(null);
+  // };
 
   if (!brandProfile || !campaigns || !influencers) return <Loading />;
 
@@ -116,7 +117,7 @@ export default function BrandDashboard() {
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => handleMatchClick(campaign)}
+                      // onClick={() => handleMatchClick(campaign)}
                       disabled={loadingMatch === campaign._id}
                     >
                       {loadingMatch === campaign._id
@@ -125,7 +126,7 @@ export default function BrandDashboard() {
                     </Button>
                   </div>
                   {/* AI Matched Influencers */}
-                  {matchedInfluencers.length > 0 && (
+                  {/* {matchedInfluencers.length > 0 && (
                     <div className="mt-4">
                       <h4 className="font-semibold mb-2">
                         AI Recommended Influencers:
@@ -152,7 +153,7 @@ export default function BrandDashboard() {
                         ))}
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </CardContent>
               </Card>
             );
@@ -167,7 +168,7 @@ export default function BrandDashboard() {
           <Link to="/brand/discover">
             <Button variant="outline">Advanced Search</Button>
           </Link>
-        </div>
+        </div> 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {influencers.slice(0, 6).map((influencer) => (
             <Card key={influencer._id}>
