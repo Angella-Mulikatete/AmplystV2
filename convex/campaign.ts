@@ -125,3 +125,30 @@ import { mutation, query } from "./_generated/server";
         .collect();
     }
   });
+
+  export const getTotalApplicationsForMyCampaigns = query({
+    handler: async (ctx) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) return 0;
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!user) return 0;
+
+      const myCampaigns = await ctx.db
+        .query("campaigns")
+        .withIndex("by_creatorUserId", q => q.eq("creatorUserId", user._id))
+        .collect();
+
+      let totalApplications = 0;
+      for (const campaign of myCampaigns) {
+        const applications = await ctx.db
+          .query("campaignApplications")
+          .withIndex("by_campaignId", q => q.eq("campaignId", campaign._id))
+          .collect();
+        totalApplications += applications.length;
+      }
+      return totalApplications;
+    }
+  });
