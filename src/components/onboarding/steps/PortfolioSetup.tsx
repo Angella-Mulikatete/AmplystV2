@@ -25,12 +25,6 @@ export interface PortfolioItem {
 
 type PortfolioItemWithoutId = Omit<PortfolioItem, 'id'>;
 
-// interface PortfolioSetupProps {
-//   data: {
-//     portfolio?: PortfolioItem[];
-//   };
-//   onUpdate: (data: { portfolio: PortfolioItem[] }) => void;
-// }
 
 interface PortfolioSetupProps {
   data: {
@@ -234,27 +228,6 @@ const PortfolioSetup: React.FC<PortfolioSetupProps> = ({ data, onUpdate }) => {
             >
               Generate portfolio from Social Media
             </Button>
-
-            {/* <Button
-              onClick={addPortfolioItem}
-              className="w-full bg-primary hover:bg-primary-600"
-              disabled={!newItem.title || !newItem.url}
-            >
-              Add to Portfolio
-            </Button> */}
-
-            {/* {data.profileData && data.primaryPlatform && (
-              <Button 
-                onClick={generateFromSocialMedia}
-                variant="outline" 
-                className="w-full mb-4 border-dashed border-primary text-primary hover:bg-primary-50"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Generate Portfolio Item from {data.primaryPlatform.charAt(0).toUpperCase() + data.primaryPlatform.slice(1)}
-              </Button>
-            )} */}
-
-            
           </div>
         </CardContent>
       </Card>

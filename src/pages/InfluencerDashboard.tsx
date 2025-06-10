@@ -107,19 +107,6 @@ const InfluencerDashboard = () => {
 
         {/* Tab Content */}
         <div className="space-y-6">
-          {/* {activeTab === "discover" && <CampaignDiscovery />}
-          {activeTab === "active" && <ActiveCampaigns />}
-          {activeTab === "applications" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>My Applications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Your campaign applications will appear here.</p>
-              </CardContent>
-            </Card>
-          )} */}
-
           {activeTab === "discover" && (
             <CampaignDiscovery campaigns={allCampaigns} profile={profile} />
           )}

@@ -82,7 +82,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Insert or update a brand profile for the current user
-export const upsertBrandProfile = mutation({
+export const insertBrandProfile = mutation({
   args: {
     companyName: v.string(),
     industry: v.string(),

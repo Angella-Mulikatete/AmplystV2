@@ -101,8 +101,6 @@ export const insertProfile = mutation({
   },
 });
 
-
-
 export const createOrGetUser = mutation({
   args: {},
   handler: async (ctx) => {

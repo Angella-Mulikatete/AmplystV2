@@ -92,9 +92,30 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
 
-const industries = [
-  "Fashion", "Beauty", "Tech", "Food & Beverage", "Health & Wellness", "Travel", "Other"
-];
+// const industries = [
+//   "Fashion", "Beauty", "Tech", "Food & Beverage", "Health & Wellness", "Travel", "Other"
+// ];
+
+ const industries = [
+    "Beauty & Skincare",
+    "Fashion & Style",
+    "Fitness & Health",
+    "Food & Cooking",
+    "Travel",
+    "Technology",
+    "Lifestyle",
+    "Gaming",
+    "Education",
+    "Entertainment",
+    "Business",
+    "Parenting",
+    "Home & Garden",
+    "Arts & Crafts",
+    "Music",
+    "Sports",
+    "Photography",
+    "Other"
+  ];
 
 const campaignGoals = [
   "Brand Awareness", "Product Launch", "Sales/Conversions", "User-Generated Content", "Event Promotion", "Other"

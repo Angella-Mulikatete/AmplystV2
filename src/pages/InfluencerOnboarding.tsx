@@ -26,7 +26,7 @@ interface InfluencerFormData {
   bio: string;
   niche: string;
   location: string;
-  followerCount: string;
+  followerCount: number;
   socialAccounts: SocialMediaAccount;
   portfolio: PortfolioItem[];
   profileData?: SocialMediaProfileData;
@@ -42,7 +42,7 @@ const InfluencerOnboarding = () => {
     role: "",
     niche: "",
     location: "",
-    followerCount: "",
+    followerCount: 0,
     socialAccounts: {
       instagram: "",
       tiktok: "",
@@ -104,7 +104,7 @@ const InfluencerOnboarding = () => {
         profilePictureUrl: user?.imageUrl,
         niche: formData.niche,
         location: formData.location,
-        followerCount: formData.followerCount,
+        followerCount: formData.followerCount || 0, // Ensure it's a number, default to 0 if invalid or undefined
         socialAccounts: formData.socialAccounts,
         portfolio: formData.portfolio,
         // Add more fields as needed, matching your Convex schema

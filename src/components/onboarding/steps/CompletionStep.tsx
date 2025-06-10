@@ -9,7 +9,7 @@ interface OnboardingData {
   lastName: string;
   niche: string;
   role: string;
-  followerCount: string;
+  followerCount: number;
   location: string;
 }
 
