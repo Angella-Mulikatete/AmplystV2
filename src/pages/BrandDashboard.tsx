@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import BrandNavbar from "@/components/brand/BrandNavbar";
 
 // Optional: Add your own loading and error components
 const Loading = () => <div>Loading...</div>;
@@ -44,6 +45,7 @@ export default function BrandDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <BrandNavbar/>
       {/* Brand Profile Overview */}
       <Card>
         <CardHeader>
