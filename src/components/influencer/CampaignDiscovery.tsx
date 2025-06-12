@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Doc, Id } from "../../../convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 interface CampaignDiscoveryProps {
   campaigns: Doc<"campaigns">[];
@@ -26,6 +28,7 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
   const [selectedNiche, setSelectedNiche] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,6 +57,30 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
     return 0;
   });
 
+  function CampaignListByNiche({ selectedNiche }) {
+    const campaigns = selectedNiche ? useQuery(api.campaign.campaignsByNiche, { niche: selectedNiche }) : null;
+  
+    if (!selectedNiche) return null;
+    if (!campaigns) return <div>Loading...</div>;
+  
+    return (
+      <div>
+        {campaigns.length === 0 && <div>No campaigns found for this niche.</div>}
+        {campaigns.map(c => (
+          <Card key={c._id}>
+            <CardHeader>
+              <CardTitle>{c.title}</CardTitle>
+              <CardDescription>{c.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* ...other campaign details */}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -73,7 +100,10 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
               className="border-gray-300"
             />
             
-            <Select value={selectedNiche} onValueChange={setSelectedNiche}>
+            <Select 
+              value={selectedNiche} 
+              onValueChange={setSelectedNiche}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select Niche" />
               </SelectTrigger>
@@ -84,9 +114,24 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
                 <SelectItem value="Health & Fitness">Health & Fitness</SelectItem>
                 <SelectItem value="Food & Cooking">Food & Cooking</SelectItem>
                 <SelectItem value="Travel">Travel</SelectItem>
-                <SelectItem value="Beauty">Beauty</SelectItem>
+                <SelectItem value="Beauty & Skincare">Beauty & Skincare</SelectItem>
+                <SelectItem value="Fitness & Health">Fitness & Health</SelectItem>
+                <SelectItem value="Lifestyle">Lifestyle</SelectItem>
+                <SelectItem value="Gaming">Gaming</SelectItem>
+                <SelectItem value="Education">Education</SelectItem>
+                <SelectItem value="Entertainment">Entertainment</SelectItem>
+                <SelectItem value="Business">Business</SelectItem>
+                <SelectItem value="Parenting">Parenting</SelectItem>
+                <SelectItem value="Home & Garden">Home & Garden</SelectItem>
+                <SelectItem value="Arts & Crafts">Arts & Crafts</SelectItem>
+                <SelectItem value="Music">Music</SelectItem>
+                <SelectItem value="Sports">Sports</SelectItem>
+                <SelectItem value="Photography">Photography</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+
               </SelectContent>
             </Select>
+            <CampaignListByNiche selectedNiche={selectedNiche} />
 
             <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
               <SelectTrigger>

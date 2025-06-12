@@ -1,3 +1,343 @@
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, Users, TrendingUp, MessageSquare, CreditCard, Zap, Target, BarChart3, Shield, CheckCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { RoleBasedRedirect } from "@/components/roleBasedRedirect";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
+const Index = () => {
+  const navigate = useNavigate();
+  const stats = useQuery(api.stats.getStats) ?? {
+    influencerCount: 0,
+    campaignsCount: 0,
+    totalPaid: 0
+  };
+
+  const brandCount = useQuery(api.brands.countBrands);
+
+
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#3A7CA5]/5 to-[#88B04B]/5">
+      {/* Navigation */}
+       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          {/* <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">A</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900">Amplyst</span>
+          </div> */}
+          <div className="flex items-center space-x-2">
+            <img 
+              src="/src/assets/logo.png"  // or logo.png
+              alt="Amplyst Logo"
+              className="w-30 h-8 object-contain"  // maintains aspect ratio
+            />
+            {/* <span className="text-xl font-bold text-gray-900">Amplyst</span> */}
+          </div>
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#features" className="text-gray-600 hover:text-[#3A7CA5] transition-colors">Features</a>
+            <a href="#how-it-works" className="text-gray-600 hover:text-[#3A7CA5] transition-colors">How It Works</a>
+            <a href="#success-stories" className="text-gray-600 hover:text-[#3A7CA5] transition-colors">Success Stories</a>
+          </div>
+          <div className="flex items-center space-x-4">
+            <SignedOut>
+              {/* <SignInButton mode="modal">
+                <Button variant="ghost"  className="text-gray-600 hover:text-[#3A7CA5]">
+                  Sign In
+                </Button>
+              </SignInButton> */}
+               <Button className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90" onClick={() => navigate("/register")}>
+                  Get Started
+                </Button>
+            </SignedOut>
+            <SignedIn>
+              <RoleBasedRedirect />
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+          </div>
+     
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center">
+          <Badge className="mb-6 bg-[#3A7CA5]/10 text-[#3A7CA5] hover:bg-[#3A7CA5]/10">
+            🚀 Smart Influencer Collaboration Platform
+          </Badge>
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            Connect Small Brands with 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3A7CA5] to-[#88B04B]">
+              {" "}Nano & Micro Influencers
+            </span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Amplyst empowers nano and micro-influencers to monetize their content while helping small brands 
+            and startups discover authentic partnerships that drive real results.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <Link to="/register?role=influencer">
+              <Button size="lg" className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90 px-8">
+                Join as Creator
+              </Button>
+            </Link>
+            <Link to="/register?role=brand">
+              <Button size="lg" variant="outline" className="border-[#3A7CA5] text-[#3A7CA5] hover:bg-[#3A7CA5]/5 px-8">
+                Find Influencers
+              </Button>
+            </Link>
+          </div>
+          
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-[#3A7CA5]" />
+                  {stats.influencerCount.toLocaleString()} Influencers
+                </CardTitle>
+                <CardDescription>Growing network of creators</CardDescription>
+              </CardHeader>
+              {/* <CardContent>
+                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
+                <p className="text-sm text-gray-600">45% increase in the last quarter</p>
+              </CardContent> */}
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-[#E19629]" />
+                  {stats.campaignsCount.toLocaleString()} Campaigns
+                </CardTitle>
+                <CardDescription>Opportunities for collaboration</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
+                <p className="text-sm text-gray-600">30% more campaigns this month</p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-[#3A7CA5]" />
+                  $5M+ Paid Out
+                  {/* ${stats.totalPaid.toLocaleString()}+ Paid Out */}
+                </CardTitle>
+                <CardDescription>Earnings for our creators</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
+                <p className="text-sm text-gray-600">Up 20% from last month</p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5 text-[#88B04B]" />
+                     {brandCount !== undefined ? brandCount : "..."} Brands
+                </CardTitle>
+                <CardDescription>Growing network of Brands on Amplyst</CardDescription>
+              </CardHeader>
+              {/* <CardContent>
+                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
+                <p className="text-sm text-gray-600">Consistent positive feedback</p>
+              </CardContent> */}
+            </Card>
+
+      
+
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            Key Features
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <Zap className="h-8 w-8 text-[#3A7CA5] mb-4 mx-auto" />
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Smart Matching
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                AI-powered matching ensures you find the perfect collaborations.
+              </CardDescription>
+            </Card>
+
+            {/* Feature 2 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <Target className="h-8 w-8 text-[#E19629] mb-4 mx-auto" />
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Targeted Campaigns
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Reach your ideal audience with precision targeting.
+              </CardDescription>
+            </Card>
+
+            {/* Feature 3 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <BarChart3 className="h-8 w-8 text-[#88B04B] mb-4 mx-auto" />
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Performance Tracking
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Monitor your campaign's success with detailed analytics.
+              </CardDescription>
+            </Card>
+
+            {/* Feature 4 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <Shield className="h-8 w-8 text-[#3A7CA5] mb-4 mx-auto" />
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Secure Payments
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Hassle-free and secure payment processing for all transactions.
+              </CardDescription>
+            </Card>
+
+            {/* Feature 5 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CheckCircle className="h-8 w-8 text-[#E19629] mb-4 mx-auto" />
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Verified Influencers
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Collaborate with trusted and verified creators.
+              </CardDescription>
+            </Card>
+
+            {/* Feature 6 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <MessageSquare className="h-8 w-8 text-[#88B04B] mb-4 mx-auto" />
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Direct Communication
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Seamlessly communicate with brands and influencers.
+              </CardDescription>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 px-4">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            How It Works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-full bg-[#3A7CA5]/10 text-[#3A7CA5] font-bold text-2xl flex items-center justify-center mb-4 mx-auto">
+                1
+              </div>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Create Your Profile
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Sign up and create a detailed profile showcasing your brand or influencer persona.
+              </CardDescription>
+            </Card>
+
+            {/* Step 2 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-full bg-[#E19629]/10 text-[#E19629] font-bold text-2xl flex items-center justify-center mb-4 mx-auto">
+                2
+              </div>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Find Opportunities
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Browse through a curated list of campaigns or influencers that match your criteria.
+              </CardDescription>
+            </Card>
+
+            {/* Step 3 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-full bg-[#88B04B]/10 text-[#88B04B] font-bold text-2xl flex items-center justify-center mb-4 mx-auto">
+                3
+              </div>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Collaborate & Earn
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Connect with your chosen partners, create content, and get paid securely through our platform.
+              </CardDescription>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories Section */}
+      <section id="success-stories" className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            Success Stories
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Story 1 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                EcoBrand & InfluencerJane
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                EcoBrand increased their sales by 40% after collaborating with InfluencerJane on a sustainable living campaign.
+              </CardDescription>
+            </Card>
+
+            {/* Story 2 */}
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                TechStartup & GadgetGuru
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                TechStartup gained 10,000 new app downloads after GadgetGuru showcased their product in a review video.
+              </CardDescription>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-4 bg-white border-t border-gray-200">
+        <div className="container mx-auto text-center">
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} Amplyst. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Index;
+
+
+
+
+
+
+
+
+
+
 // import { Button } from "@/components/ui/button";
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 // import { Badge } from "@/components/ui/badge";
@@ -475,318 +815,3 @@
 
 
 
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Star, Users, TrendingUp, MessageSquare, CreditCard, Zap, Target, BarChart3, Shield, CheckCircle } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
-import { RoleBasedRedirect } from "@/components/roleBasedRedirect";
-
-const Index = () => {
-  const navigate = useNavigate();
-  
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#3A7CA5]/5 to-[#88B04B]/5">
-      {/* Navigation */}
-       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          {/* <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">Amplyst</span>
-          </div> */}
-          <div className="flex items-center space-x-2">
-            <img 
-              src="/src/assets/logo.png"  // or logo.png
-              alt="Amplyst Logo"
-              className="w-30 h-8 object-contain"  // maintains aspect ratio
-            />
-            {/* <span className="text-xl font-bold text-gray-900">Amplyst</span> */}
-          </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-gray-600 hover:text-[#3A7CA5] transition-colors">Features</a>
-            <a href="#how-it-works" className="text-gray-600 hover:text-[#3A7CA5] transition-colors">How It Works</a>
-            <a href="#success-stories" className="text-gray-600 hover:text-[#3A7CA5] transition-colors">Success Stories</a>
-          </div>
-          <div className="flex items-center space-x-4">
-            <SignedOut>
-              {/* <SignInButton mode="modal">
-                <Button variant="ghost"  className="text-gray-600 hover:text-[#3A7CA5]">
-                  Sign In
-                </Button>
-              </SignInButton> */}
-               <Button className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90" onClick={() => navigate("/register")}>
-                  Get Started
-                </Button>
-            </SignedOut>
-            <SignedIn>
-              <RoleBasedRedirect />
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-          </div>
-     
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <Badge className="mb-6 bg-[#3A7CA5]/10 text-[#3A7CA5] hover:bg-[#3A7CA5]/10">
-            🚀 Smart Influencer Collaboration Platform
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Connect Small Brands with 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3A7CA5] to-[#88B04B]">
-              {" "}Nano & Micro Influencers
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Amplyst empowers nano and micro-influencers to monetize their content while helping small brands 
-            and startups discover authentic partnerships that drive real results.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link to="/register?role=influencer">
-              <Button size="lg" className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90 px-8">
-                Join as Creator
-              </Button>
-            </Link>
-            <Link to="/register?role=brand">
-              <Button size="lg" variant="outline" className="border-[#3A7CA5] text-[#3A7CA5] hover:bg-[#3A7CA5]/5 px-8">
-                Find Influencers
-              </Button>
-            </Link>
-          </div>
-          
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-[#3A7CA5]" />
-                  15K+ Influencers
-                </CardTitle>
-                <CardDescription>Growing network of creators</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">45% increase in the last quarter</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-[#E19629]" />
-                  20K+ Campaigns
-                </CardTitle>
-                <CardDescription>Opportunities for collaboration</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">30% more campaigns this month</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-[#3A7CA5]" />
-                  $5M+ Paid Out
-                </CardTitle>
-                <CardDescription>Earnings for our creators</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">Up 20% from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-[#88B04B]" />
-                  4.8/5 Avg. Rating
-                </CardTitle>
-                <CardDescription>Satisfaction from brands & creators</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">Consistent positive feedback</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-16 px-4 bg-gray-50">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Key Features
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <Zap className="h-8 w-8 text-[#3A7CA5] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Smart Matching
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                AI-powered matching ensures you find the perfect collaborations.
-              </CardDescription>
-            </Card>
-
-            {/* Feature 2 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <Target className="h-8 w-8 text-[#E19629] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Targeted Campaigns
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Reach your ideal audience with precision targeting.
-              </CardDescription>
-            </Card>
-
-            {/* Feature 3 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <BarChart3 className="h-8 w-8 text-[#88B04B] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Performance Tracking
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Monitor your campaign's success with detailed analytics.
-              </CardDescription>
-            </Card>
-
-            {/* Feature 4 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <Shield className="h-8 w-8 text-[#3A7CA5] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Secure Payments
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Hassle-free and secure payment processing for all transactions.
-              </CardDescription>
-            </Card>
-
-            {/* Feature 5 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <CheckCircle className="h-8 w-8 text-[#E19629] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Verified Influencers
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Collaborate with trusted and verified creators.
-              </CardDescription>
-            </Card>
-
-            {/* Feature 6 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <MessageSquare className="h-8 w-8 text-[#88B04B] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Direct Communication
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Seamlessly communicate with brands and influencers.
-              </CardDescription>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 px-4">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            How It Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#3A7CA5]/10 text-[#3A7CA5] font-bold text-2xl flex items-center justify-center mb-4 mx-auto">
-                1
-              </div>
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Create Your Profile
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Sign up and create a detailed profile showcasing your brand or influencer persona.
-              </CardDescription>
-            </Card>
-
-            {/* Step 2 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#E19629]/10 text-[#E19629] font-bold text-2xl flex items-center justify-center mb-4 mx-auto">
-                2
-              </div>
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Find Opportunities
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Browse through a curated list of campaigns or influencers that match your criteria.
-              </CardDescription>
-            </Card>
-
-            {/* Step 3 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#88B04B]/10 text-[#88B04B] font-bold text-2xl flex items-center justify-center mb-4 mx-auto">
-                3
-              </div>
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Collaborate & Earn
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Connect with your chosen partners, create content, and get paid securely through our platform.
-              </CardDescription>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Success Stories Section */}
-      <section id="success-stories" className="py-16 px-4 bg-gray-50">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Success Stories
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Story 1 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                EcoBrand & InfluencerJane
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                EcoBrand increased their sales by 40% after collaborating with InfluencerJane on a sustainable living campaign.
-              </CardDescription>
-            </Card>
-
-            {/* Story 2 */}
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                TechStartup & GadgetGuru
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                TechStartup gained 10,000 new app downloads after GadgetGuru showcased their product in a review video.
-              </CardDescription>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-4 bg-white border-t border-gray-200">
-        <div className="container mx-auto text-center">
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Amplyst. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default Index;

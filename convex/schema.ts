@@ -76,6 +76,7 @@ const applicationTables = {
     startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
     requirements: v.optional(v.string()),
+    niche: v.optional(v.string()),
     
     // Add more campaign fields as needed
   }).index("by_creatorUserId", ["creatorUserId"]),

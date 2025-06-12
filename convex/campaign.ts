@@ -1,9 +1,9 @@
 import { mutation, query } from "./_generated/server";
-    import { v } from "convex/values";
-    import { getAuthUserId } from "@convex-dev/auth/server";
-    import { Doc, Id } from "./_generated/dataModel";
+import { v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { Doc, Id } from "./_generated/dataModel";
 
-    export const createCampaign = mutation({
+  export const createCampaign = mutation({
       args: {
         role: v.union(
           v.literal("influencer"),
@@ -150,5 +150,15 @@ import { mutation, query } from "./_generated/server";
         totalApplications += applications.length;
       }
       return totalApplications;
+    }
+  });
+
+  export const campaignsByNiche = query({
+    args: { niche: v.string() },
+    handler: async (ctx, args) => {
+      return await ctx.db
+        .query("campaigns")
+        .filter(q => q.eq(q.field("targetAudience"), args.niche))
+        .collect();
     }
   });

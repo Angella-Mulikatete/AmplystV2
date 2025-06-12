@@ -16,6 +16,7 @@ import type {
 import type * as brands from "../brands.js";
 import type * as campaign from "../campaign.js";
 import type * as influencers from "../influencers.js";
+import type * as stats from "../stats.js";
 import type * as users from "../users.js";
 
 /**
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   brands: typeof brands;
   campaign: typeof campaign;
   influencers: typeof influencers;
+  stats: typeof stats;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

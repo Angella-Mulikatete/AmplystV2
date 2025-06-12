@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,28 @@ const InfluencerDashboard = () => {
   const activeCampaigns = useQuery(api.campaign.activeForInfluencer);
   // Fetch campaigns the influencer has applied to
   const myApplications = useQuery(api.campaign.campaignsForInfluencer);
+
+  // function CampaignListByNiche({ selectedNiche }) {
+  //   const campaigns = useQuery(api.campaign.campaignsByNiche, selectedNiche ? { niche: selectedNiche } : undefined);
+  
+  //   if (!campaigns) return <div>Loading...</div>;
+  
+  //   return (
+  //     <div>
+  //       {campaigns.length === 0 && <div>No campaigns found for this niche.</div>}
+  //       {campaigns.map(c => (
+  //         <Card key={c._id}>
+  //           <CardHeader>
+  //             <CardTitle>{c.title}</CardTitle>
+  //             <CardDescription>{c.description}</CardDescription>
+  //           </CardHeader>
+  //         </Card>
+  //       ))}
+  //     </div>
+  //   );
+  // }
+
+  const [selectedNiche, setSelectedNiche] = useState("");
 
   console.log("Profile data in influencer dashboard:", profile);
   if (!profile) {
@@ -108,13 +130,13 @@ const InfluencerDashboard = () => {
         {/* Tab Content */}
         <div className="space-y-6">
           {activeTab === "discover" && (
-            <CampaignDiscovery campaigns={allCampaigns} profile={profile} />
+            <CampaignDiscovery campaigns={allCampaigns ?? []} profile={profile} />
           )}
           {activeTab === "active" && (
-            <ActiveCampaigns campaigns={activeCampaigns} profile={profile} />
+            <ActiveCampaigns campaigns={activeCampaigns ?? []} profile={profile} />
           )}
           {activeTab === "applications" && (
-            <MyApplications campaigns={myApplications} profile={profile} />
+            <MyApplications campaigns={myApplications ?? []} profile={profile} />
           )}
         </div>
       </div>
