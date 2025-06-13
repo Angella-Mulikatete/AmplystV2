@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, DollarSign, Eye, CheckCircle, XCircle } from "lucide-react";
 import { Doc, Id } from "../../../convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
 
 interface MyApplicationsProps {
   campaigns: Doc<"campaigns">[];
@@ -23,9 +25,23 @@ const MyApplications = ({ campaigns, profile }: MyApplicationsProps) => {
     }
   };
 
+  // Get all applications for the current user
+  const applications = useQuery(api.campaign.campaignsForInfluencer);
+
+  if (!applications) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3A7CA5] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your applications...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {campaigns.length === 0 ? (
+      {applications.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -34,7 +50,7 @@ const MyApplications = ({ campaigns, profile }: MyApplicationsProps) => {
           </CardContent>
         </Card>
       ) : (
-        campaigns.map((campaign) => (
+        applications.map((campaign) => (
           <Card key={campaign._id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
@@ -71,7 +87,12 @@ const MyApplications = ({ campaigns, profile }: MyApplicationsProps) => {
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
-                {/* Add buttons for withdrawing application or viewing status if applicable */}
+                {campaign.status === "pending" && (
+                  <Button size="sm" variant="outline" className="border-red-500 text-red-500 hover:bg-red-50">
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Withdraw Application
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

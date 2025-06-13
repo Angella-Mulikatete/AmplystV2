@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,7 @@ import { useState } from "react";
 import { Doc, Id } from "../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import ApplicationModal from "../ApplicationModal";
 
 interface CampaignDiscoveryProps {
   campaigns: Doc<"campaigns">[];
@@ -28,7 +28,8 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
   const [selectedNiche, setSelectedNiche] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [sortBy, setSortBy] = useState("newest");
-  
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<Id<"campaigns"> | null>(null);
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,7 +58,10 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
     return 0;
   });
 
+  const applications = useQuery(api.campaign.getTotalApplicationsForMyCampaigns);
+
   function CampaignListByNiche({ selectedNiche }) {
+    // Only call useQuery if a niche is selected
     const campaigns = selectedNiche ? useQuery(api.campaign.campaignsByNiche, { niche: selectedNiche }) : null;
   
     if (!selectedNiche) return null;
@@ -215,6 +219,10 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
                 <Button 
                   className="flex-1 bg-[#3A7CA5] hover:bg-[#3A7CA5]/90 text-white"
                   size="sm"
+                  onClick={() => {
+                    setSelectedCampaignId(campaign._id);
+                    setShowModal(true);
+                  }}
                 >
                   Apply Now
                 </Button>
@@ -226,9 +234,41 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
                   Save
                 </Button>
               </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Badge 
+                  variant={campaign.status === 'active' ? 'default' : 'secondary'}
+                  className={campaign.status === 'active' ? 'bg-green-100 text-green-800' : ''}
+                >
+                  {campaign.status}
+                </Badge>
+                {campaign.budget && (
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    ${campaign.budget.toLocaleString()}
+                  </Badge>
+                )}
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  {campaign.duration}
+                </Badge>
+                {campaign.requirements && campaign.requirements.includes('Required Influencers:') && (
+                  <Badge variant="outline" className="bg-[#E19629]/10 text-[#E19629] border-[#E19629]/20">
+                    {campaign.requirements.split('Required Influencers:')[1].split('.')[0].trim()} Influencers
+                  </Badge>
+                )}
+              </div>
             </CardContent>
           </Card>
+          
         ))}
+            {showModal && selectedCampaignId && (
+              <ApplicationModal 
+                campaignId={selectedCampaignId} 
+                onClose={() => {
+                  setShowModal(false);
+                  setSelectedCampaignId(null);
+                }} 
+              />
+            )}
       </div>
 
       {filteredCampaigns.length === 0 && (

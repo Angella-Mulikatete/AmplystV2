@@ -1,6 +1,7 @@
 // convex/brands.ts
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 // Insert or update a brand profile for the current user
 export const insertBrandProfile = mutation({
@@ -74,6 +75,63 @@ export const getMyBrandProfile = query({
   },
 });
 
+export const updateBrandProfile = mutation({
+  args: {
+    companyName: v.string(),
+    industry: v.string(),
+    contactPerson: v.string(),
+    businessEmail: v.string(),
+    location: v.string(),
+    campaignGoal: v.string(),
+    targetAudience: v.string(),
+    budgetRange: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const brandProfile = await ctx.db
+      .query("brands")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+
+    if (!brandProfile) {
+      // Create new brand profile if it doesn't exist
+      const newProfileId = await ctx.db.insert("brands", {
+        userId: userId as Id<"users">,
+        companyName: args.companyName,
+        industry: args.industry,
+        contactPerson: args.contactPerson,
+        businessEmail: args.businessEmail,
+        location: args.location,
+        campaignGoal: args.campaignGoal,
+        targetAudience: args.targetAudience,
+        budgetRange: args.budgetRange,
+        description: args.description,
+      });
+      return newProfileId;
+    }
+
+    // Update existing profile
+    await ctx.db.patch(brandProfile._id, {
+      companyName: args.companyName,
+      industry: args.industry,
+      contactPerson: args.contactPerson,
+      businessEmail: args.businessEmail,
+      location: args.location,
+      campaignGoal: args.campaignGoal,
+      targetAudience: args.targetAudience,
+      budgetRange: args.budgetRange,
+      description: args.description,
+    });
+
+    return brandProfile._id;
+  },
+});
 
 export const listBrands = query({
   handler: async (ctx) => {

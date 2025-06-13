@@ -19,6 +19,7 @@ import { Doc, Id } from "./_generated/dataModel";
         startDate: v.optional(v.string()),
         endDate: v.optional(v.string()),
         duration: v.optional(v.string()),
+        requirements: v.optional(v.string()),
       },
       handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -61,16 +62,34 @@ import { Doc, Id } from "./_generated/dataModel";
     handler: async (ctx) => {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) return [];
-      const user = await ctx.db
+
+      const brand = await ctx.db
         .query("users")
         .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
         .unique();
-      if (!user) return [];
-      return await ctx.db
+      if (!brand) return [];
+
+      const campaigns = await ctx.db
         .query("campaigns")
-        .withIndex("by_creatorUserId", q => q.eq("creatorUserId", user._id))
+        .withIndex("by_creatorUserId", q => q.eq("creatorUserId", brand._id))
         .collect();
-    }
+
+      // Get applications for each campaign
+      const campaignsWithApplications = await Promise.all(
+        campaigns.map(async (campaign) => {
+          const applications = await ctx.db
+            .query("campaignApplications")
+            .withIndex("by_campaignId", q => q.eq("campaignId", campaign._id))
+            .collect();
+          return {
+            ...campaign,
+            applications,
+          };
+        })
+      );
+
+      return campaignsWithApplications;
+    },
   });
 
   export const getCampaignDetails = query({
@@ -161,4 +180,245 @@ import { Doc, Id } from "./_generated/dataModel";
         .filter(q => q.eq(q.field("targetAudience"), args.niche))
         .collect();
     }
+  });
+
+  export const withdrawApplication = mutation({
+    args: {
+      campaignId: v.id("campaigns"),
+    },
+    handler: async (ctx, args) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+
+      // Find influencer user
+      const influencer = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!influencer) throw new Error("User not found");
+
+      // Find the application
+      const application = await ctx.db
+        .query("campaignApplications")
+        .withIndex("by_campaignId", q => q.eq("campaignId", args.campaignId))
+        .filter(q => q.eq(q.field("influencerUserId"), influencer._id))
+        .first();
+
+      if (!application) throw new Error("No application found for this campaign");
+
+      // Delete the application
+      await ctx.db.delete(application._id);
+      return true;
+    }
+  });
+
+  export const applyToCampaign = mutation({
+    args: {
+      campaignId: v.id("campaigns"),
+      pitch: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+
+      // Find influencer user
+      const influencer = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!influencer) throw new Error("User not found");
+
+      // Check for existing application
+      const existing = await ctx.db
+        .query("campaignApplications")
+        .withIndex("by_campaignId", q => q.eq("campaignId", args.campaignId))
+        .filter(q => q.eq(q.field("influencerUserId"), influencer._id))
+        .first();
+
+      if (existing) {
+        // If there's an existing application, update it instead of creating a new one
+        await ctx.db.patch(existing._id, {
+          pitch: args.pitch,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        });
+        return existing._id;
+      }
+
+      // Create new application
+      return await ctx.db.insert("campaignApplications", {
+        campaignId: args.campaignId,
+        influencerUserId: influencer._id,
+        status: "pending",
+        pitch: args.pitch,
+        createdAt: new Date().toISOString(),
+      });
+    }
+  });
+
+  export const updateApplicationStatus = mutation({
+    args: {
+      applicationId: v.id("campaignApplications"),
+      status: v.string(),
+    },
+    handler: async (ctx, args) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+
+      // Find the application
+      const application = await ctx.db.get(args.applicationId);
+      if (!application) throw new Error("Application not found");
+
+      // Get the campaign to verify ownership
+      const campaign = await ctx.db.get(application.campaignId);
+      if (!campaign) throw new Error("Campaign not found");
+
+      // Verify the user owns the campaign
+      const brand = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!brand || brand._id !== campaign.creatorUserId) {
+        throw new Error("Not authorized to update this application");
+      }
+
+      // Update the application status
+      await ctx.db.patch(args.applicationId, {
+        status: args.status,
+      });
+
+      return true;
+    },
+  });
+
+  export const updateCampaign = mutation({
+    args: {
+      campaignId: v.id("campaigns"),
+      title: v.optional(v.string()),
+      description: v.optional(v.string()),
+      budget: v.optional(v.number()),
+      status: v.optional(v.string()),
+      targetAudience: v.optional(v.string()),
+      contentTypes: v.optional(v.array(v.string())),
+      duration: v.optional(v.string()),
+      requirements: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+
+      // Get the campaign
+      const campaign = await ctx.db.get(args.campaignId);
+      if (!campaign) throw new Error("Campaign not found");
+
+      // Verify the user owns the campaign
+      const brand = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!brand || brand._id !== campaign.creatorUserId) {
+        throw new Error("Not authorized to update this campaign");
+      }
+
+      // Remove campaignId from args before updating
+      const { campaignId, ...updateData } = args;
+
+      // Update the campaign
+      await ctx.db.patch(args.campaignId, updateData);
+      return true;
+    },
+  });
+
+  export const deleteCampaign = mutation({
+    args: {
+      campaignId: v.id("campaigns"),
+    },
+    handler: async (ctx, args) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+
+      // Get the campaign
+      const campaign = await ctx.db.get(args.campaignId);
+      if (!campaign) throw new Error("Campaign not found");
+
+      // Verify the user owns the campaign
+      const brand = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!brand || brand._id !== campaign.creatorUserId) {
+        throw new Error("Not authorized to delete this campaign");
+      }
+
+      // Delete all applications for this campaign first
+      const applications = await ctx.db
+        .query("campaignApplications")
+        .withIndex("by_campaignId", q => q.eq("campaignId", args.campaignId))
+        .collect();
+
+      for (const application of applications) {
+        await ctx.db.delete(application._id);
+      }
+
+      // Delete the campaign
+      await ctx.db.delete(args.campaignId);
+      return true;
+    },
+  });
+
+  export const extendCampaign = mutation({
+    args: {
+      campaignId: v.id("campaigns"),
+      newEndDate: v.string(),
+    },
+    handler: async (ctx, args) => {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+
+      // Get the campaign
+      const campaign = await ctx.db.get(args.campaignId);
+      if (!campaign) throw new Error("Campaign not found");
+
+      // Verify the user owns the campaign
+      const brand = await ctx.db
+        .query("users")
+        .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+        .unique();
+      if (!brand || brand._id !== campaign.creatorUserId) {
+        throw new Error("Not authorized to extend this campaign");
+      }
+
+      // Update the campaign end date
+      await ctx.db.patch(args.campaignId, {
+        endDate: args.newEndDate,
+      });
+      return true;
+    },
+  });
+
+  // Function to check for expired campaigns
+  export const checkExpiredCampaigns = mutation({
+    handler: async (ctx) => {
+      const now = new Date().toISOString();
+      
+      // Find all active campaigns that have expired
+      const expiredCampaigns = await ctx.db
+        .query("campaigns")
+        .filter(q => 
+          q.and(
+            q.eq(q.field("status"), "active"),
+            q.lt(q.field("endDate"), now)
+          )
+        )
+        .collect();
+
+      // Update expired campaigns to "expired" status
+      for (const campaign of expiredCampaigns) {
+        await ctx.db.patch(campaign._id, {
+          status: "expired"
+        });
+      }
+
+      return expiredCampaigns.length;
+    },
   });

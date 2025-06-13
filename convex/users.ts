@@ -145,34 +145,26 @@ export const createOrGetUser = mutation({
 });
 
 export const getInfluencerProfile = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { userId: v.optional(v.id("profiles")) },
+  handler: async (ctx, args) => {
+    if (args.userId) {
+      return await ctx.db.get(args.userId);
+    }
+    
     const identity = await ctx.auth.getUserIdentity();
-    console.log("getInfluencerProfile identity in the getInfluencerProfile:", identity);
     if (!identity) return null;
     
-    // Get user
-    console.log("getInfluencerProfile: Querying user with tokenIdentifier:", identity.tokenIdentifier);
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
       .unique();
       
-    console.log("getInfluencerProfile: User found:", user);
-    if (!user) {
-      console.log("getInfluencerProfile: User not found for tokenIdentifier:", identity.tokenIdentifier);
-      return null;
-    }
+    if (!user) return null;
     
-    
-    // Get profile
-    const profile = await ctx.db
+    return await ctx.db
       .query("profiles")
       .withIndex("by_userId", q => q.eq("userId", user._id))
       .unique();
-      console.log("profile in the getInfluencerProfile:", profile);
-      
-    return profile;
   }
 });
 
@@ -257,6 +249,13 @@ export const getUserRoleByIdentifier = action({
     if (!user) return null;
     return { role: user.role, exists: true };
   },
+});
+
+export const getInfluencerProfileById = query({
+  args: { userId: v.id("profiles") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.userId);
+  }
 });
 
 

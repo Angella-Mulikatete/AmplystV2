@@ -6,6 +6,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
 import type { FunctionArgs } from "convex/server"; // Import FunctionArgs
+import { toast } from "@/components/ui/use-toast";
 
 // Define the type for the arguments expected by the Convex mutation
 type CreateCampaignMutationArgs = FunctionArgs<typeof api.campaign.createCampaign>;
@@ -22,6 +23,8 @@ interface CampaignFormData {
   endDate: string;   // Corrected to endDate
   status: CreateCampaignMutationArgs["status"]; // Use the literal type from mutation args
   role: CreateCampaignMutationArgs["role"]; // Use the literal type from mutation args
+  requiredInfluencers: string; // Add this field
+  requirements: string;
 }
 
 const contentTypeOptions = [
@@ -42,7 +45,9 @@ export default function CampaignCreation() {
     startDate: "", // Corrected to startDate
     endDate: "",   // Corrected to endDate
     status: "active", // This should now correctly be "active"
-    role: "brand" // This should now correctly be "brand"
+    role: "brand", // This should now correctly be "brand"
+    requiredInfluencers: "", // Initialize the new field
+    requirements: "",
   });
   const [loading, setLoading] = useState(false);
   const createCampaign = useMutation(api.campaign.createCampaign);
@@ -65,23 +70,38 @@ export default function CampaignCreation() {
     e.preventDefault();
     setLoading(true);
 
-    // Prepare data for Convex mutation, converting types as needed
-    const campaignData: CreateCampaignMutationArgs = {
-      title: form.title,
-      description: form.description,
-      budget: form.budget ? Number(form.budget) : undefined,
-      targetAudience: form.targetAudience || undefined,
-      contentTypes: form.contentTypes.length > 0 ? form.contentTypes : undefined,
-      duration: form.duration || undefined,
-      startDate: form.startDate || undefined, // Corrected to startDate
-      endDate: form.endDate || undefined,     // Corrected to endDate
-      status: form.status,
-      role: form.role,
-    };
+    try {
+      const campaignData: CreateCampaignMutationArgs = {
+        title: form.title,
+        description: form.description,
+        budget: form.budget ? Number(form.budget) : undefined,
+        targetAudience: form.targetAudience || undefined,
+        contentTypes: form.contentTypes.length > 0 ? form.contentTypes : undefined,
+        duration: form.duration || undefined,
+        startDate: form.startDate || undefined,
+        endDate: form.endDate || undefined,
+        status: form.status,
+        role: form.role,
+        requirements: form.requiredInfluencers ? `Required Influencers: ${form.requiredInfluencers}. ${form.requirements}` : form.requirements || undefined,
+      };
 
-    await createCampaign(campaignData);
-    setLoading(false);
-    // navigate("/brand/dashboard");
+      await createCampaign(campaignData);
+      toast({
+        title: "Success",
+        description: "Campaign created successfully!",
+        variant: "success",
+      });
+      navigate("/brand/dashboard");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create campaign. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error creating campaign:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -113,6 +133,13 @@ export default function CampaignCreation() {
               placeholder="Target Audience (e.g., 18-25, USA, fashion lovers)"
               value={form.targetAudience}
               onChange={e => handleChange("targetAudience", e.target.value)}
+            />
+            <Input
+              type="number"
+              placeholder="Number of Influencers Needed"
+              value={form.requiredInfluencers}
+              onChange={e => handleChange("requiredInfluencers", e.target.value)}
+              min="1"
             />
             <div>
               <label className="block mb-2 font-medium">Content Types</label>
