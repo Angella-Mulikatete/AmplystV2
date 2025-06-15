@@ -29,8 +29,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/onboarding/influencer" element={<InfluencerOnboarding />} />
-           <Route path="/onboarding/brand" element={<BrandOnboarding />} />
-           {/* <Route path="/onboarding/brand" element={<CampaignCreation />} /> */}
+          <Route path="/onboarding/brand" element={<BrandOnboarding userType="brand" />} />
+          {/* <Route path="/onboarding/brand" element={<CampaignCreation />} /> */}
           <Route path="/brand/dashboard" element={<BrandDashboard />} />
           <Route path="/brand/campaigns/create" element={<CampaignCreation />} />
           <Route path="/brand/discover" element={<InfluencerDiscovery />} />

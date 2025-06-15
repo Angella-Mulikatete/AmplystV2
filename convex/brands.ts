@@ -13,6 +13,8 @@ export const insertBrandProfile = mutation({
     contactPerson: v.string(),
     location: v.optional(v.string()),
     description: v.optional(v.string()),
+    companySize: v.optional(v.string()),
+    logoUrl: v.optional(v.string()),
     campaignGoal: v.optional(v.string()),
     targetAudience: v.optional(v.string()),
     influencerType: v.optional(v.string()),
@@ -20,6 +22,10 @@ export const insertBrandProfile = mutation({
     budgetRange: v.optional(v.string()),
     contentType: v.optional(v.string()),
     campaignDescription: v.optional(v.string()),
+    campaignCount: v.optional(v.number()),
+    activeCampaigns: v.optional(v.array(v.id("campaigns"))),
+    totalBudget: v.optional(v.number()),
+    influencerCollaborations: v.optional(v.array(v.id("profiles")))
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();

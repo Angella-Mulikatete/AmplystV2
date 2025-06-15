@@ -77,9 +77,10 @@ import { Doc, Id } from "./_generated/dataModel";
       // Get applications for each campaign
       const campaignsWithApplications = await Promise.all(
         campaigns.map(async (campaign) => {
+          // Get applications for this campaign using campaignId field
           const applications = await ctx.db
-            .query("campaignApplications")
-            .withIndex("by_campaignId", q => q.eq("campaignId", campaign._id))
+            .query("applications")
+            .filter(q => q.eq(q.field("campaignId"), campaign._id))
             .collect();
           return {
             ...campaign,
@@ -111,8 +112,8 @@ import { Doc, Id } from "./_generated/dataModel";
       const userId = await getAuthUserId(ctx);
       if (!userId) return [];
       // Assuming you have a campaignApplications table:
-      const applications = await ctx.db.query("campaignApplications")
-        .withIndex("by_influencerUserId", q => q.eq("influencerUserId", userId))
+      const applications = await ctx.db.query("applications")
+        .withIndex("by_influencer", q => q.eq("influencerId", userId))
         .collect();
       const campaignIds = applications.map(app => app.campaignId);
       if (campaignIds.length === 0) {
@@ -131,9 +132,9 @@ import { Doc, Id } from "./_generated/dataModel";
       if (!userId) return [];
       // Fetch applications where this influencer is 'active' (customize status as needed)
       const activeApplications = await ctx.db
-        .query("campaignApplications")
-        .withIndex("by_influencerUserId", q => q.eq("influencerUserId", userId))
-        .filter(q => q.eq(q.field("status"), "active")) // or "accepted", depending on your schema
+        .query("applications")
+        .withIndex("by_influencer", q => q.eq("influencerId", userId))
+        .filter(q => q.eq(q.field("status"), "approved")) // Using approved as per schema
         .collect();
       const campaignIds = activeApplications.map(app => app.campaignId);
       if (campaignIds.length === 0) return [];
@@ -163,8 +164,8 @@ import { Doc, Id } from "./_generated/dataModel";
       let totalApplications = 0;
       for (const campaign of myCampaigns) {
         const applications = await ctx.db
-          .query("campaignApplications")
-          .withIndex("by_campaignId", q => q.eq("campaignId", campaign._id))
+          .query("applications")
+          .filter(q => q.eq(q.field("campaignId"), campaign._id))
           .collect();
         totalApplications += applications.length;
       }
@@ -199,9 +200,13 @@ import { Doc, Id } from "./_generated/dataModel";
 
       // Find the application
       const application = await ctx.db
-        .query("campaignApplications")
-        .withIndex("by_campaignId", q => q.eq("campaignId", args.campaignId))
-        .filter(q => q.eq(q.field("influencerUserId"), influencer._id))
+        .query("applications")
+        .filter(q => 
+          q.and(
+            q.eq(q.field("campaignId"), args.campaignId),
+            q.eq(q.field("influencerId"), influencer._id)
+          )
+        )
         .first();
 
       if (!application) throw new Error("No application found for this campaign");
@@ -230,35 +235,57 @@ import { Doc, Id } from "./_generated/dataModel";
 
       // Check for existing application
       const existing = await ctx.db
-        .query("campaignApplications")
-        .withIndex("by_campaignId", q => q.eq("campaignId", args.campaignId))
-        .filter(q => q.eq(q.field("influencerUserId"), influencer._id))
+        .query("applications")
+        .filter(q => 
+          q.and(
+            q.eq(q.field("campaignId"), args.campaignId),
+            q.eq(q.field("influencerId"), influencer._id)
+          )
+        )
         .first();
 
       if (existing) {
         // If there's an existing application, update it instead of creating a new one
         await ctx.db.patch(existing._id, {
-          pitch: args.pitch,
+          message: args.pitch || "",
           status: "pending",
-          createdAt: new Date().toISOString(),
+          updatedAt: Date.now(),
         });
         return existing._id;
       }
 
+      // Get the campaign to get the creator user ID
+      const campaign = await ctx.db.get(args.campaignId);
+      if (!campaign) throw new Error("Campaign not found");
+      
+      // Get the brand associated with the creator user
+      const brand = await ctx.db
+        .query("brands")
+        .withIndex("by_userId", q => q.eq("userId", campaign.creatorUserId))
+        .unique();
+      if (!brand) throw new Error("Brand not found for this campaign");
+      
       // Create new application
-      return await ctx.db.insert("campaignApplications", {
+      return await ctx.db.insert("applications", {
         campaignId: args.campaignId,
-        influencerUserId: influencer._id,
+        brandId: brand._id,
+        influencerId: influencer._id,
         status: "pending",
-        pitch: args.pitch,
-        createdAt: new Date().toISOString(),
+        message: args.pitch || "",
+        influencerNiche: "",
+        proposedContent: "",
+        influencerName: influencer.username || influencer.email || "",
+        influencerEmail: influencer.email || "",
+        campaignTitle: campaign.title || "",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
     }
   });
 
   export const updateApplicationStatus = mutation({
     args: {
-      applicationId: v.id("campaignApplications"),
+      applicationId: v.id("applications"),
       status: v.string(),
     },
     handler: async (ctx, args) => {
@@ -284,7 +311,8 @@ import { Doc, Id } from "./_generated/dataModel";
 
       // Update the application status
       await ctx.db.patch(args.applicationId, {
-        status: args.status,
+        status: args.status as "pending" | "approved" | "rejected",
+        updatedAt: Date.now(),
       });
 
       return true;
@@ -352,8 +380,8 @@ import { Doc, Id } from "./_generated/dataModel";
 
       // Delete all applications for this campaign first
       const applications = await ctx.db
-        .query("campaignApplications")
-        .withIndex("by_campaignId", q => q.eq("campaignId", args.campaignId))
+        .query("applications")
+        .filter(q => q.eq(q.field("campaignId"), args.campaignId))
         .collect();
 
       for (const application of applications) {
@@ -421,4 +449,14 @@ import { Doc, Id } from "./_generated/dataModel";
 
       return expiredCampaigns.length;
     },
+  });
+
+  export const campaignsByBrand = query({
+    args: { brandUserId: v.id("users") },
+    handler: async (ctx, args) => {
+      return await ctx.db
+        .query("campaigns")
+        .withIndex("by_creatorUserId", q => q.eq("creatorUserId", args.brandUserId))
+        .collect();
+    }
   });

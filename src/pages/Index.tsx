@@ -9,6 +9,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-reac
 import { RoleBasedRedirect } from "@/components/roleBasedRedirect";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import Onboarding from "@/components/onboarding";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -59,6 +60,7 @@ const Index = () => {
             </SignedOut>
             <SignedIn>
               <RoleBasedRedirect />
+              {/* <Onboarding/> */}
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
           </div>
@@ -316,10 +318,10 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 bg-white border-t border-gray-200">
-        <div className="container mx-auto text-center">
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Amplyst. All rights reserved.
+      <footer className="bg-primary-800 text-white py-8 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-primary-200">
+            © 2024 Amplyst. Revolutionizing influencer marketing with AI.
           </p>
         </div>
       </footer>

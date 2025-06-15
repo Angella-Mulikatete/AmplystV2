@@ -13,9 +13,11 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as applications from "../applications.js";
 import type * as brands from "../brands.js";
 import type * as campaign from "../campaign.js";
 import type * as influencers from "../influencers.js";
+import type * as migrations from "../migrations.js";
 import type * as stats from "../stats.js";
 import type * as users from "../users.js";
 
@@ -28,9 +30,11 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  applications: typeof applications;
   brands: typeof brands;
   campaign: typeof campaign;
   influencers: typeof influencers;
+  migrations: typeof migrations;
   stats: typeof stats;
   users: typeof users;
 }>;

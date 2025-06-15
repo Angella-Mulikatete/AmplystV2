@@ -27,6 +27,37 @@ const applicationTables = {
   .index("by_token", ["tokenIdentifier"]) // Essential for auth lookup
   .index("by_email", ["email"]),  
       
+  // profiles : defineTable({
+  //   userId: v.id("users"),
+  //   role: v.union(
+  //     v.literal("influencer"),
+  //     v.literal("brand"),
+  //     v.literal("agency")
+  //   ),
+  //   name: v.string(),
+  //   bio: v.optional(v.string()),
+  //   profilePictureUrl: v.optional(v.string()),
+  //   // Influencer-specific fields
+  //   niche: v.optional(v.string()),
+  //   location: v.optional(v.string()),
+  //   followerCount: v.optional(v.number()), // Changed to number
+  //   engagementRate: v.optional(v.number()), // Added engagementRate
+  //   socialAccounts: v.optional(
+  //     v.object({
+  //       instagram: v.string(),
+  //       tiktok: v.string(),
+  //       youtube: v.string(),
+  //       twitter: v.string(),
+  //     })
+  //   ),
+  //   portfolio: v.optional(v.array(v.any())),
+  //   primaryPlatform: v.optional(v.string()), // Add this line
+  //   // Brand/agency-specific fields
+  //   companyName: v.optional(v.string()),
+  //   website: v.optional(v.string()),
+  //   industry: v.optional(v.string()),
+  // }).index("by_userId", ["userId"]),
+
   profiles : defineTable({
     userId: v.id("users"),
     role: v.union(
@@ -35,13 +66,14 @@ const applicationTables = {
       v.literal("agency")
     ),
     name: v.string(),
-    bio: v.optional(v.string()),
+    handle: v.optional(v.string()), // <-- Add this
+    verified: v.optional(v.boolean()), // <-- Add this
     profilePictureUrl: v.optional(v.string()),
-    // Influencer-specific fields
+    bio: v.optional(v.string()),
     niche: v.optional(v.string()),
     location: v.optional(v.string()),
-    followerCount: v.optional(v.number()), // Changed to number
-    engagementRate: v.optional(v.number()), // Added engagementRate
+    followerCount: v.optional(v.number()),
+    engagementRate: v.optional(v.number()),
     socialAccounts: v.optional(
       v.object({
         instagram: v.string(),
@@ -51,13 +83,34 @@ const applicationTables = {
       })
     ),
     portfolio: v.optional(v.array(v.any())),
-    primaryPlatform: v.optional(v.string()), // Add this line
+    primaryPlatform: v.optional(v.array(v.string())),
+    recentPost: v.optional(v.string()), // <-- Add this
+    price: v.optional(v.string()), // <-- Add this
+    rating: v.optional(v.number()), // <-- Add this
     // Brand/agency-specific fields
     companyName: v.optional(v.string()),
     website: v.optional(v.string()),
     industry: v.optional(v.string()),
-  }).index("by_userId", ["userId"]),
-
+    description: v.optional(v.string()),
+    contactPerson: v.optional(v.string()),
+    businessEmail: v.optional(v.string()),
+    campaignGoal: v.optional(v.string()),
+    targetAudience: v.optional(v.string()),
+    influencerType: v.optional(v.array(v.string())),
+    influencerNiche: v.optional(v.array(v.string())),
+    budgetRange: v.optional(v.string()),
+    contentType: v.optional(v.array(v.string())),
+    campaignDescription: v.optional(v.string()),
+    campaignCount: v.optional(v.number()),
+    activeCampaigns: v.optional(v.array(v.id("campaigns"))),
+    totalBudget: v.optional(v.number()),
+    totalEarnings: v.optional(v.number()),
+  })
+  .index("by_userId", ["userId"]),
+  
+  
+  
+  
   campaigns : defineTable({
     creatorUserId: v.id("users"), // Brand or agency user
     role: v.union(
@@ -81,15 +134,22 @@ const applicationTables = {
     // Add more campaign fields as needed
   }).index("by_creatorUserId", ["creatorUserId"]),
 
-  campaignApplications : defineTable({
+  applications: defineTable({
     campaignId: v.id("campaigns"),
-    influencerUserId: v.id("users"),
-    status: v.string(), // "pending", "accepted", "rejected", etc.
-    pitch: v.optional(v.string()),
-    createdAt: v.string(),
-  })
-  .index("by_campaignId", ["campaignId"])
-  .index("by_influencerUserId", ["influencerUserId"]),
+    influencerId: v.id("users"),
+    brandId: v.optional(v.id("brands")),
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    message: v.optional(v.string()),
+    proposedContent: v.optional(v.string()),
+    influencerName: v.optional(v.string()),
+    influencerEmail: v.optional(v.string()),
+    influencerNiche: v.optional(v.string()),
+    campaignTitle: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_campaign", ["campaignId"])
+    .index("by_influencer", ["influencerId"])
+    .index("by_brand", ["brandId"]),
 
   // Messaging
   messages :defineTable({
@@ -102,7 +162,7 @@ const applicationTables = {
   // Analytics
   analytics : defineTable({
     campaignId: v.id("campaigns"),
-    influencerUserId: v.id("users"),
+    influencerId: v.id("users"),
     platform: v.string(),
     impressions: v.optional(v.number()),
     clicks: v.optional(v.number()),
@@ -117,13 +177,13 @@ const applicationTables = {
   // Payments
   payments : defineTable({
     campaignId: v.id("campaigns"),
-    influencerUserId: v.id("users"),
+    influencerId: v.id("users"),
     amount: v.number(),
     currency: v.string(),
     status: v.string(), // "pending", "paid", "failed"
     paidAt: v.optional(v.string()),
     method: v.optional(v.string()),
-  }).index("by_influencerUserId", ["influencerUserId"]),
+  }).index("by_influencerId", ["influencerId"]),
 
   //brands
   brands: defineTable({
@@ -132,9 +192,11 @@ const applicationTables = {
     website: v.optional(v.string()),
     industry: v.optional(v.string()),
     description: v.optional(v.string()),
-    contactPerson: v.optional(v.string()), // Added contactPerson
-    businessEmail: v.optional(v.string()), // Added businessEmail
-    location: v.optional(v.string()), // Added location
+    contactPerson: v.optional(v.string()),
+    businessEmail: v.optional(v.string()),
+    location: v.optional(v.string()),
+    companySize: v.optional(v.string()),
+    logoUrl: v.optional(v.string()),
     campaignGoal: v.optional(v.string()),
     targetAudience: v.optional(v.string()),
     influencerType: v.optional(v.string()),
@@ -142,6 +204,15 @@ const applicationTables = {
     budgetRange: v.optional(v.string()),
     contentType: v.optional(v.string()),
     campaignDescription: v.optional(v.string()),
+    campaignCount: v.optional(v.number()),
+    activeCampaigns: v.optional(v.array(v.id("campaigns"))),
+    totalBudget: v.optional(v.number()),
+    influencerCollaborations: v.optional(v.array(v.id("profiles"))),
+    totalReach: v.optional(v.number()),
+    reachChange: v.optional(v.number()),
+    totalSpent: v.optional(v.number()),
+    avgEngagement: v.optional(v.number()),
+    engagementChange: v.optional(v.number())
   }).index("by_userId", ["userId"])
 
 };

@@ -8,7 +8,10 @@ export const filterInfluencers = query({
     niche: v.optional(v.string()),
     minFollowers: v.optional(v.number()),
     maxFollowers: v.optional(v.number()),
+    minEngagement: v.optional(v.number()),
+    maxEngagement: v.optional(v.number()),
     location: v.optional(v.string()),
+    search: v.optional(v.string()),
     sortBy: v.optional(v.string()), // "followers", "engagement", etc.
     sortOrder: v.optional(v.string()), // "asc" or "desc"
   },
@@ -29,6 +32,25 @@ export const filterInfluencers = query({
     }
 
     let influencers = await q.collect();
+
+    // Apply engagement rate filtering after collecting results
+    if (args.minEngagement || args.maxEngagement) {
+      influencers = influencers.filter(influencer => {
+        const engagementRate = influencer.engagementRate || 0;
+        if (args.minEngagement && engagementRate < args.minEngagement) return false;
+        if (args.maxEngagement && engagementRate > args.maxEngagement) return false;
+        return true;
+      });
+    }
+
+    // Apply search filter after collecting results
+    if (args.search) {
+      const searchLower = args.search.toLowerCase();
+      influencers = influencers.filter(influencer => 
+        influencer.name?.toLowerCase().includes(searchLower) ||
+        influencer.handle?.toLowerCase().includes(searchLower)
+      );
+    }
 
     // Sorting
     if (args.sortBy) {
@@ -67,13 +89,19 @@ export const listInfluencers = query({
       },
 });
 
-// export const getInfluencerProfileByUserId = query({
-//   args: { userId: v.id("users") },
-//   handler: async (ctx, { userId }) => {
-//     const profile = await ctx.db
-//       .query("profiles")
-//       .withIndex("by_userId", (q) => q.eq("userId", userId))
-//       .unique();
-//     return profile;
-//   },
-// });
+export const getInfluencerProfileByUserId = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    // Find the profile with the given userId and role === "influencer"
+    const [profile] = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.eq(q.field("role"), "influencer"))
+      .collect();
+
+    // Return the profile or null if not found
+    return profile ?? null;
+  },
+});

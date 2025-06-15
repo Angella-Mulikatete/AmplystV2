@@ -1,514 +1,791 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { DialogHeader } from "@/components/ui/dialog";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
-
-const niches = ["Fashion", "Tech", "Fitness", "Beauty", "Travel"];
-const locations = ["Uganda", "UK", "Germany", "Kenya", "Nigeria"];
-
-export default function InfluencerDiscovery() {
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  const [profileIdToLoad, setProfileIdToLoad] = useState(null); // New state to trigger profile fetch
-  const [filters, setFilters] = useState({
-    niche: "",
-    minFollowers: "",
-    maxFollowers: "",
-    location: "",
-    sortBy: "followerCount",
-    sortOrder: "desc",
-  });
-
-  const influencers = useQuery(api.influencers.filterInfluencers, {
-    niche: filters.niche || undefined,
-    minFollowers: filters.minFollowers ? Number(filters.minFollowers) : undefined,
-    maxFollowers: filters.maxFollowers ? Number(filters.maxFollowers) : undefined,
-    location: filters.location || undefined,
-    sortBy: filters.sortBy,
-    sortOrder: filters.sortOrder,
-  });
-
-  // const fetchedProfileData = useQuery( // Renamed to avoid confusion
-  //     api.influencers.getInfluencerProfileByUserId,
-  //     profileIdToLoad ? { userId: profileIdToLoad } : null // Query runs when profileIdToLoad is set
-  // );
-
-  // useEffect(() => { // Effect to update selectedProfile when fetched data is ready
-  //   if (fetchedProfileData) {
-  //     setSelectedProfile(fetchedProfileData);
-  //   }
-  // }, [fetchedProfileData]);
-  
-  // const handleViewProfile = async (userId) => {
-  //   setProfileIdToLoad(userId); // Trigger the query by setting the ID
-  //   // selectedProfile will be updated by the useEffect when fetchedProfileData is available
-  // };
-
-
-  return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Discover Influencers</h2>
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <Select
-          value={filters.niche || undefined} // Make it controlled, use undefined for placeholder
-          onValueChange={value => setFilters(f => ({ ...f, niche: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="All Niches" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={undefined}>All Niches</SelectItem>
-            {niches.map(niche => <SelectItem key={niche} value={niche}>{niche}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Input
-          type="number"
-          placeholder="Min Followers"
-          value={filters.minFollowers}
-          onChange={e => setFilters(f => ({ ...f, minFollowers: e.target.value }))}
-        />
-        <Input
-          type="number"
-          placeholder="Max Followers"
-          value={filters.maxFollowers}
-          onChange={e => setFilters(f => ({ ...f, maxFollowers: e.target.value }))}
-        />
-        <Select
-          value={filters.location || undefined} // Make it controlled, use undefined for placeholder
-          onValueChange={value => setFilters(f => ({ ...f, location: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="All Locations" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={undefined}>All Locations</SelectItem>
-            {locations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select
-          value={filters.sortBy}
-          onValueChange={value => setFilters(f => ({ ...f, sortBy: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Sort By" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="followerCount">Followers</SelectItem>
-            <SelectItem value="engagementRate">Engagement</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid md:grid-cols-2 gap-6">
-        {influencers?.map((influencer: typeof influencers[number] & { engagementRate?: number, followerCount?: number }) => (
-          <Card key={influencer._id}>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={influencer.profilePictureUrl || "/placeholder.jpg"}
-                  alt={influencer.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="text-lg font-semibold">{influencer.name}</h3>
-                  <p className="text-sm text-gray-500">{influencer.niche} • {influencer.location}</p>
-                  <div className="text-xs text-gray-600 mt-1">
-                    <span><strong>Followers:</strong> {influencer.followerCount}</span>
-                    <span className="ml-4"><strong>Engagement:</strong> {influencer.engagementRate || "N/A"}%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3">
-                <Button size="sm" 
-                  variant="outline" 
-                  // onClick={() => handleViewProfile(influencer.userId)}
-                >View Profile</Button>
-                <Button size="sm" className="ml-2">Invite to Campaign</Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {influencers && influencers.length === 0 && (
-        <div className="text-gray-500 text-center py-8">No influencers match your filters.</div>
-      )}
-
-      {/* Profile Modal */}
-      {/* <Dialog open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedProfile?.name || "Influencer Profile"}</DialogTitle>
-          </DialogHeader>
-          {selectedProfile ? (
-            <div>
-              <img src={selectedProfile.profilePictureUrl} alt={selectedProfile.name} className="w-24 h-24 rounded-full mb-4" />
-              <p><strong>Bio:</strong> {selectedProfile.bio}</p>
-              <p><strong>Niche:</strong> {selectedProfile.niche}</p>
-              <p><strong>Location:</strong> {selectedProfile.location}</p>
-              <p><strong>Followers:</strong> {selectedProfile.followerCount}</p>
-
-              <h4 className="mt-4 font-semibold">Portfolio</h4>
-              {selectedProfile.portfolio?.length ? (
-                <ul className="list-disc pl-5">
-                  {selectedProfile.portfolio.map((item, idx) => (
-                    <li key={idx}>
-                      <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
-                        {item.title}
-                      </a> - {item.description}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No portfolio items available.</p>
-              )}
-            </div>
-          ) : (
-            <p>Loading profile...</p>
-          )}
-        </DialogContent>
-      </Dialog> */}
-    </div>
-  );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import { useState } from "react";
+// import { useQuery } from "convex/react";
+// import { api } from "../../convex/_generated/api";
 // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // import { Badge } from "@/components/ui/badge";
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // import { Slider } from "@/components/ui/slider";
 // import { Separator } from "@/components/ui/separator";
-// import { Search, Filter, MapPin, Users, Heart, MessageCircle, ArrowLeft } from "lucide-react";
-// import { useNavigate } from "react-router-dom";
-// import BrandNavbar from "@/components/brand/BrandNavbar";
+// import { 
+//   Search,
+//   Filter,
+//   MapPin,
+//   Users,
+//   TrendingUp,
+//   Instagram,
+//   Twitter,
+//   Youtube,
+//   Heart,
+//   MessageCircle,
+//   Share2,
+//   Star,
+//   CheckCircle
+// } from "lucide-react";
+// import { motion } from "framer-motion";
 
 // const InfluencerDiscovery = () => {
-//   const navigate = useNavigate();
+//   const [followers, setFollowers] = useState([10000, 1000000]);
+//   const [engagement, setEngagement] = useState([2, 10]);
+//   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
 //   const [searchQuery, setSearchQuery] = useState("");
-//   const [filters, setFilters] = useState({
-//     category: "",
-//     location: "",
-//     followerRange: [1000, 1000000],
-//     engagementRate: [1, 10],
-//     priceRange: [100, 10000]
+//   const [selectedLocation, setSelectedLocation] = useState("");
+//   const [sortBy, setSortBy] = useState("followerCount");
+//   const [sortOrder, setSortOrder] = useState("desc");
+
+//   const niches = [
+//     "Fashion", "Beauty", "Technology", "Fitness", "Food", "Travel", 
+//     "Lifestyle", "Gaming", "Music", "Art", "Sports", "Business"
+//   ];
+
+//   const locations = ["Uganda", "UK", "Germany", "Kenya", "Nigeria"];
+
+//   // Convex query with filters
+//   const influencers = useQuery(api.influencers.filterInfluencers, {
+//     niche: selectedNiches.length === 1 ? selectedNiches[0] : undefined,
+//     minFollowers: followers[0],
+//     maxFollowers: followers[1],
+//     location: selectedLocation || undefined,
+//     sortBy: sortBy,
+//     sortOrder: sortOrder,
 //   });
 
-//   const [showFilters, setShowFilters] = useState(false);
+//   // Filter influencers based on search query and engagement rate
+//   const filteredInfluencers = influencers?.filter(influencer => {
+//     const matchesSearch = !searchQuery || 
+//       influencer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//       influencer.userId?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+//     const matchesEngagement = !influencer.engagementRate || 
+//       (influencer.engagementRate >= engagement[0] && influencer.engagementRate <= engagement[1]);
+    
+//     const matchesNiches = selectedNiches.length === 0 || 
+//       selectedNiches.includes(influencer.niche);
 
-//   const influencers = [
-//     {
-//       id: 1,
-//       name: "Sarah Johnson",
-//       username: "@sarahjohnson",
-//       avatar: "/placeholder.svg",
-//       category: "Fashion & Beauty",
-//       followers: 45000,
-//       engagement: 4.2,
-//       location: "New York, NY",
-//       rate: 1200,
-//       bio: "Fashion enthusiast and beauty guru. Love sharing style tips and product reviews.",
-//       tags: ["Fashion", "Beauty", "Lifestyle"]
-//     },
-//     {
-//       id: 2,
-//       name: "Mike Chen",
-//       username: "@mikethebiker",
-//       avatar: "/placeholder.svg",
-//       category: "Technology",
-//       followers: 78000,
-//       engagement: 3.8,
-//       location: "San Francisco, CA",
-//       rate: 2100,
-//       bio: "Tech reviewer and gadget enthusiast. Always testing the latest devices.",
-//       tags: ["Technology", "Reviews", "Gadgets"]
-//     },
-//     {
-//       id: 3,
-//       name: "Emma Davis",
-//       username: "@emmafitness",
-//       avatar: "/placeholder.svg",
-//       category: "Fitness & Health",
-//       followers: 92000,
-//       engagement: 5.1,
-//       location: "Los Angeles, CA",
-//       rate: 1800,
-//       bio: "Certified personal trainer helping people achieve their fitness goals.",
-//       tags: ["Fitness", "Health", "Wellness"]
-//     },
-//     {
-//       id: 4,
-//       name: "Alex Rivera",
-//       username: "@alexeats",
-//       avatar: "/placeholder.svg",
-//       category: "Food & Beverage",
-//       followers: 34000,
-//       engagement: 4.7,
-//       location: "Chicago, IL",
-//       rate: 950,
-//       bio: "Food blogger and chef sharing delicious recipes and restaurant reviews.",
-//       tags: ["Food", "Cooking", "Restaurants"]
+//     return matchesSearch && matchesEngagement && matchesNiches;
+//   }) || [];
+
+//   const getPlatformIcon = (platform: string) => {
+//     switch (platform) {
+//       case 'instagram':
+//         return <Instagram className="w-4 h-4" />;
+//       case 'twitter':
+//         return <Twitter className="w-4 h-4" />;
+//       case 'youtube':
+//         return <Youtube className="w-4 h-4" />;
+//       default:
+//         return null;
 //     }
-//   ];
-
-//   const categories = [
-//     "All Categories",
-//     "Fashion & Beauty",
-//     "Technology",
-//     "Fitness & Health",
-//     "Food & Beverage",
-//     "Travel & Lifestyle",
-//     "Gaming",
-//     "Education",
-//     "Entertainment"
-//   ];
-
-//   const formatFollowers = (count: number) => {
-//     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-//     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-//     return count.toString();
 //   };
 
-//   const filteredInfluencers = influencers.filter(influencer => {
-//     const matchesSearch = influencer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//                          influencer.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//                          influencer.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
-//     const matchesCategory = !filters.category || filters.category === "All Categories" || 
-//                            influencer.category === filters.category;
-    
-//     const matchesFollowers = influencer.followers >= filters.followerRange[0] && 
-//                            influencer.followers <= filters.followerRange[1];
-    
-//     const matchesEngagement = influencer.engagement >= filters.engagementRate[0] && 
-//                             influencer.engagement <= filters.engagementRate[1];
-    
-//     const matchesPrice = influencer.rate >= filters.priceRange[0] && 
-//                        influencer.rate <= filters.priceRange[1];
+//   const formatNumber = (num: number) => {
+//     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+//     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+//     return num.toString();
+//   };
 
-//     return matchesSearch && matchesCategory && matchesFollowers && matchesEngagement && matchesPrice;
-//   });
+//   const handleSortChange = (value: string) => {
+//     if (value === "relevance") {
+//       setSortBy("followerCount");
+//       setSortOrder("desc");
+//     } else if (value === "followers") {
+//       setSortBy("followerCount");
+//       setSortOrder("desc");
+//     } else if (value === "engagement") {
+//       setSortBy("engagementRate");
+//       setSortOrder("desc");
+//     } else if (value === "rating") {
+//       setSortBy("followerCount"); // Default since we don't have rating field
+//       setSortOrder("desc");
+//     }
+//   };
 
 //   return (
-//     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-primary-50">
-//       <BrandNavbar />
-      
-//       <div className="container mx-auto px-4 py-8">
-//         {/* Header */}
-//         <div className="flex items-center mb-8">
-//           <Button 
-//             variant="ghost" 
-//             onClick={() => navigate("/brand/dashboard")}
-//             className="mr-4"
-//           >
-//             <ArrowLeft className="h-4 w-4 mr-2" />
-//             Back to Dashboard
-//           </Button>
-//           <div>
-//             <h1 className="text-3xl font-bold text-gray-900 font-poppins">Discover Influencers</h1>
-//             <p className="text-gray-600 mt-2 font-sofia">Find the perfect influencers for your campaigns</p>
-//           </div>
+//     <div className="space-y-6 p-6">
+//       {/* Header */}
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <h1 className="text-3xl font-bold text-primary-800">Discover Influencers</h1>
+//           <p className="text-gray-600 mt-1">Find the perfect creators for your campaigns</p>
 //         </div>
+//         <Button className="bg-primary hover:bg-primary-600">
+//           <Filter className="w-4 h-4 mr-2" />
+//           Advanced Filters
+//         </Button>
+//       </div>
 
-//         {/* Search and Filters */}
-//         <Card className="mb-8 animate-fade-in">
-//           <CardContent className="p-6">
-//             <div className="flex flex-col md:flex-row gap-4 mb-4">
-//               <div className="flex-1 relative">
-//                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-//                 <Input
-//                   placeholder="Search influencers by name, username, or category..."
-//                   value={searchQuery}
-//                   onChange={(e) => setSearchQuery(e.target.value)}
-//                   className="pl-10"
-//                 />
-//               </div>
-//               <Button
-//                 variant="outline"
-//                 onClick={() => setShowFilters(!showFilters)}
-//                 className="flex items-center space-x-2"
-//               >
-//                 <Filter className="h-4 w-4" />
-//                 <span>Filters</span>
-//               </Button>
-//             </div>
-
-//             {showFilters && (
-//               <div className="border-t pt-4 animate-fade-in">
-//                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//                   <div className="space-y-2">
-//                     <label className="text-sm font-medium">Category</label>
-//                     <Select onValueChange={(value) => setFilters(prev => ({ ...prev, category: value }))}>
-//                       <SelectTrigger>
-//                         <SelectValue placeholder="Select category" />
-//                       </SelectTrigger>
-//                       <SelectContent>
-//                         {categories.map((category) => (
-//                           <SelectItem key={category} value={category}>
-//                             {category}
-//                           </SelectItem>
-//                         ))}
-//                       </SelectContent>
-//                     </Select>
-//                   </div>
-
-//                   <div className="space-y-2">
-//                     <label className="text-sm font-medium">
-//                       Followers: {formatFollowers(filters.followerRange[0])} - {formatFollowers(filters.followerRange[1])}
-//                     </label>
-//                     <Slider
-//                       value={filters.followerRange}
-//                       onValueChange={(value) => setFilters(prev => ({ ...prev, followerRange: value }))}
-//                       min={1000}
-//                       max={1000000}
-//                       step={1000}
-//                       className="w-full"
-//                     />
-//                   </div>
-
-//                   <div className="space-y-2">
-//                     <label className="text-sm font-medium">
-//                       Engagement Rate: {filters.engagementRate[0]}% - {filters.engagementRate[1]}%
-//                     </label>
-//                     <Slider
-//                       value={filters.engagementRate}
-//                       onValueChange={(value) => setFilters(prev => ({ ...prev, engagementRate: value }))}
-//                       min={1}
-//                       max={10}
-//                       step={0.1}
-//                       className="w-full"
-//                     />
-//                   </div>
+//       <div className="grid lg:grid-cols-4 gap-6">
+//         {/* Filters Sidebar */}
+//         <motion.div 
+//           className="lg:col-span-1"
+//           initial={{ opacity: 0, x: -20 }}
+//           animate={{ opacity: 1, x: 0 }}
+//           transition={{ duration: 0.5 }}
+//         >
+//           <Card className="sticky top-6">
+//             <CardHeader>
+//               <CardTitle className="flex items-center gap-2">
+//                 <Filter className="w-5 h-5" />
+//                 Filters
+//               </CardTitle>
+//             </CardHeader>
+//             <CardContent className="space-y-6">
+//               {/* Search */}
+//               <div>
+//                 <Label htmlFor="search">Search</Label>
+//                 <div className="relative mt-1">
+//                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+//                   <Input
+//                     id="search"
+//                     placeholder="Search by name or handle..."
+//                     className="pl-10"
+//                     value={searchQuery}
+//                     onChange={(e) => setSearchQuery(e.target.value)}
+//                   />
 //                 </div>
 //               </div>
-//             )}
-//           </CardContent>
-//         </Card>
 
-//         {/* Results */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//           {filteredInfluencers.map((influencer, index) => (
-//             <Card 
-//               key={influencer.id} 
-//               className="hover-lift animate-fade-in cursor-pointer"
-//               style={{ animationDelay: `${index * 0.1}s` }}
-//             >
-//               <CardHeader className="pb-4">
-//                 <div className="flex items-center space-x-4">
-//                   <Avatar className="h-12 w-12">
-//                     <AvatarImage src={influencer.avatar} alt={influencer.name} />
-//                     <AvatarFallback className="bg-primary text-white">
-//                       {influencer.name.split(' ').map(n => n[0]).join('')}
-//                     </AvatarFallback>
-//                   </Avatar>
-//                   <div className="flex-1">
-//                     <h3 className="font-semibold text-lg font-poppins">{influencer.name}</h3>
-//                     <p className="text-sm text-gray-600">{influencer.username}</p>
-//                   </div>
+//               <Separator />
+
+//               {/* Followers Range */}
+//               <div>
+//                 <Label>Followers</Label>
+//                 <div className="mt-3 mb-4">
+//                   <Slider
+//                     value={followers}
+//                     onValueChange={setFollowers}
+//                     max={5000000}
+//                     min={1000}
+//                     step={1000}
+//                     className="w-full"
+//                   />
 //                 </div>
-//               </CardHeader>
-//               <CardContent className="space-y-4">
-//                 <p className="text-sm text-gray-600 line-clamp-2">{influencer.bio}</p>
-                
-//                 <div className="flex flex-wrap gap-1">
-//                   {influencer.tags.map((tag) => (
-//                     <Badge key={tag} variant="secondary" className="text-xs">
-//                       {tag}
+//                 <div className="flex justify-between text-sm text-gray-500">
+//                   <span>{formatNumber(followers[0])}</span>
+//                   <span>{formatNumber(followers[1])}</span>
+//                 </div>
+//               </div>
+
+//               <Separator />
+
+//               {/* Engagement Rate */}
+//               <div>
+//                 <Label>Engagement Rate (%)</Label>
+//                 <div className="mt-3 mb-4">
+//                   <Slider
+//                     value={engagement}
+//                     onValueChange={setEngagement}
+//                     max={15}
+//                     min={0.1}
+//                     step={0.1}
+//                     className="w-full"
+//                   />
+//                 </div>
+//                 <div className="flex justify-between text-sm text-gray-500">
+//                   <span>{engagement[0]}%</span>
+//                   <span>{engagement[1]}%</span>
+//                 </div>
+//               </div>
+
+//               <Separator />
+
+//               {/* Location */}
+//               <div>
+//                 <Label htmlFor="location">Location</Label>
+//                 <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+//                   <SelectTrigger className="mt-1">
+//                     <SelectValue placeholder="Select location" />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="">All Locations</SelectItem>
+//                     {locations.map((location) => (
+//                       <SelectItem key={location} value={location}>{location}</SelectItem>
+//                     ))}
+//                   </SelectContent>
+//                 </Select>
+//               </div>
+
+//               <Separator />
+
+//               {/* Niche */}
+//               <div>
+//                 <Label>Niche</Label>
+//                 <div className="mt-2 flex flex-wrap gap-2">
+//                   {niches.map((niche) => (
+//                     <Badge
+//                       key={niche}
+//                       variant={selectedNiches.includes(niche) ? "default" : "outline"}
+//                       className={`cursor-pointer ${
+//                         selectedNiches.includes(niche)
+//                           ? "bg-primary text-white"
+//                           : "hover:bg-primary-50"
+//                       }`}
+//                       onClick={() => {
+//                         if (selectedNiches.includes(niche)) {
+//                           setSelectedNiches(selectedNiches.filter(n => n !== niche));
+//                         } else {
+//                           setSelectedNiches([...selectedNiches, niche]);
+//                         }
+//                       }}
+//                     >
+//                       {niche}
 //                     </Badge>
 //                   ))}
 //                 </div>
-
-//                 <Separator />
-
-//                 <div className="grid grid-cols-2 gap-4 text-sm">
-//                   <div className="flex items-center space-x-2">
-//                     <Users className="h-4 w-4 text-primary" />
-//                     <span>{formatFollowers(influencer.followers)}</span>
-//                   </div>
-//                   <div className="flex items-center space-x-2">
-//                     <Heart className="h-4 w-4 text-red-500" />
-//                     <span>{influencer.engagement}%</span>
-//                   </div>
-//                   <div className="flex items-center space-x-2">
-//                     <MapPin className="h-4 w-4 text-gray-500" />
-//                     <span className="text-xs">{influencer.location}</span>
-//                   </div>
-//                   <div className="text-right">
-//                     <span className="font-semibold text-accent">${influencer.rate}</span>
-//                     <span className="text-xs text-gray-500">/post</span>
-//                   </div>
-//                 </div>
-
-//                 <div className="flex space-x-2 pt-2">
-//                   <Button size="sm" className="flex-1 bg-primary hover:bg-primary-600">
-//                     <MessageCircle className="h-4 w-4 mr-2" />
-//                     Contact
-//                   </Button>
-//                   <Button size="sm" variant="outline" className="flex-1">
-//                     View Profile
-//                   </Button>
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           ))}
-//         </div>
-
-//         {filteredInfluencers.length === 0 && (
-//           <Card className="p-8 text-center animate-fade-in">
-//             <CardContent>
-//               <p className="text-gray-500 mb-4">No influencers found matching your criteria.</p>
-//               <Button 
-//                 variant="outline" 
-//                 onClick={() => {
-//                   setSearchQuery("");
-//                   setFilters({
-//                     category: "",
-//                     location: "",
-//                     followerRange: [1000, 1000000],
-//                     engagementRate: [1, 10],
-//                     priceRange: [100, 10000]
-//                   });
-//                 }}
-//               >
-//                 Clear Filters
-//               </Button>
+//               </div>
 //             </CardContent>
 //           </Card>
-//         )}
+//         </motion.div>
+
+//         {/* Results */}
+//         <div className="lg:col-span-3">
+//           <div className="flex items-center justify-between mb-6">
+//             <p className="text-gray-600">
+//               Found <span className="font-semibold">{filteredInfluencers.length}</span> influencers
+//             </p>
+//             <Select defaultValue="followers" onValueChange={handleSortChange}>
+//               <SelectTrigger className="w-48">
+//                 <SelectValue />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 <SelectItem value="relevance">Most Relevant</SelectItem>
+//                 <SelectItem value="followers">Most Followers</SelectItem>
+//                 <SelectItem value="engagement">Highest Engagement</SelectItem>
+//                 <SelectItem value="rating">Highest Rated</SelectItem>
+//               </SelectContent>
+//             </Select>
+//           </div>
+
+//           {influencers === undefined ? (
+//             <div className="text-center py-8">Loading influencers...</div>
+//           ) : (
+//             <div className="grid gap-6">
+//               {filteredInfluencers.map((influencer, index) => (
+//                 <motion.div
+//                   key={influencer._id}
+//                   initial={{ opacity: 0, y: 20 }}
+//                   animate={{ opacity: 1, y: 0 }}
+//                   transition={{ delay: index * 0.1 }}
+//                 >
+//                   <Card className="hover:shadow-lg transition-shadow">
+//                     <CardContent className="p-6">
+//                       <div className="flex items-start gap-4">
+//                         <Avatar className="w-16 h-16">
+//                           <AvatarImage src={influencer.profilePictureUrl || "/placeholder.jpg"} />
+//                           <AvatarFallback>{influencer.name?.charAt(0) || "U"}</AvatarFallback>
+//                         </Avatar>
+
+//                         <div className="flex-1">
+//                           <div className="flex items-start justify-between mb-2">
+//                             <div>
+//                               <div className="flex items-center gap-2">
+//                                 <h3 className="font-semibold text-lg">{influencer.name}</h3>
+//                                 <CheckCircle className="w-5 h-5 text-blue-500" />
+//                               </div>
+//                               <p className="text-gray-600">@{influencer.userId || "username"}</p>
+//                             </div>
+                            
+//                             <div className="text-right">
+//                               <div className="flex items-center gap-1 mb-1">
+//                                 <Star className="w-4 h-4 text-yellow-500 fill-current" />
+//                                 <span className="font-medium">4.8</span>
+//                               </div>
+//                               <p className="text-sm text-gray-600">$500-1000</p>
+//                             </div>
+//                           </div>
+
+//                           <div className="flex items-center gap-4 mb-3">
+//                             <div className="flex items-center gap-1 text-sm text-gray-600">
+//                               <Users className="w-4 h-4" />
+//                               <span>{formatNumber(influencer.followerCount || 0)} followers</span>
+//                             </div>
+//                             {influencer.engagementRate && (
+//                               <div className="flex items-center gap-1 text-sm text-gray-600">
+//                                 <TrendingUp className="w-4 h-4" />
+//                                 <span>{influencer.engagementRate}% engagement</span>
+//                               </div>
+//                             )}
+//                             <div className="flex items-center gap-1 text-sm text-gray-600">
+//                               <MapPin className="w-4 h-4" />
+//                               <span>{influencer.location}</span>
+//                             </div>
+//                           </div>
+
+//                           <div className="flex items-center gap-3 mb-4">
+//                             <Badge variant="secondary">{influencer.niche}</Badge>
+//                             <div className="flex items-center gap-2">
+//                               {getPlatformIcon('instagram')}
+//                               {getPlatformIcon('youtube')}
+//                             </div>
+//                           </div>
+
+//                           {influencer.bio && (
+//                             <div className="bg-gray-50 rounded-lg p-3 mb-4">
+//                               <p className="text-sm text-gray-700 italic">"{influencer.bio}"</p>
+//                             </div>
+//                           )}
+
+//                           <div className="flex items-center justify-between">
+//                             <div className="flex items-center gap-4 text-sm text-gray-600">
+//                               <div className="flex items-center gap-1">
+//                                 <Heart className="w-4 h-4" />
+//                                 <span>2.4k</span>
+//                               </div>
+//                               <div className="flex items-center gap-1">
+//                                 <MessageCircle className="w-4 h-4" />
+//                                 <span>89</span>
+//                               </div>
+//                               <div className="flex items-center gap-1">
+//                                 <Share2 className="w-4 h-4" />
+//                                 <span>24</span>
+//                               </div>
+//                             </div>
+
+//                             <div className="flex items-center gap-2">
+//                               <Button variant="outline" size="sm">
+//                                 View Profile
+//                               </Button>
+//                               <Button size="sm" className="bg-primary hover:bg-primary-600">
+//                                 Invite to Campaign
+//                               </Button>
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </CardContent>
+//                   </Card>
+//                 </motion.div>
+//               ))}
+//             </div>
+//           )}
+
+//           {filteredInfluencers.length === 0 && influencers !== undefined && (
+//             <div className="text-gray-500 text-center py-8">
+//               No influencers match your filters.
+//             </div>
+//           )}
+//         </div>
 //       </div>
 //     </div>
 //   );
 // };
 
 // export default InfluencerDiscovery;
+
+
+
+import { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import {
+  Search,
+  Filter,
+  MapPin,
+  Users,
+  TrendingUp,
+  Instagram,
+  Twitter,
+  Youtube,
+  Heart,
+  MessageCircle,
+  Share2,
+  Star,
+  CheckCircle,
+  X
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+
+const niches = [
+  "Fashion", "Beauty", "Technology", "Fitness", "Food", "Travel",
+  "Lifestyle", "Gaming", "Music", "Art", "Sports", "Business"
+];
+const locations = ["Uganda", "UK", "Germany", "Kenya", "Nigeria", "United States", "Canada", "Australia"];
+
+const getPlatformIcon = (platform) => {
+  switch (platform) {
+    case 'instagram':
+      return <Instagram className="w-4 h-4" />;
+    case 'twitter':
+      return <Twitter className="w-4 h-4" />;
+    case 'youtube':
+      return <Youtube className="w-4 h-4" />;
+    default:
+      return null;
+  }
+};
+
+const formatNumber = (num) => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+};
+
+export default function InfluencerDiscovery() {
+  // Filter states
+  const [followers, setFollowers] = useState([10000, 1000000]);
+  const [engagement, setEngagement] = useState([2, 10]);
+  const [selectedNiches, setSelectedNiches] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("relevance");
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [profileIdToLoad, setProfileIdToLoad] = useState(null);
+
+  // Query influencers from backend
+  const influencers = useQuery(api.influencers.filterInfluencers, {
+    niche: selectedNiches.length > 0 ? selectedNiches[0] : undefined,
+    minFollowers: followers[0],
+    maxFollowers: followers[1],
+    location: selectedLocation || undefined,
+    minEngagement: engagement[0],
+    maxEngagement: engagement[1],
+    // location: selectedLocation || undefined,
+    search: search || undefined,
+    sortBy,
+    sortOrder: sortBy === "followers" || sortBy === "engagement" || sortBy === "rating" ? "desc" : undefined,
+  });
+
+  // Profile modal data (fetch when profileIdToLoad is set)
+  const profileData = useQuery(
+    api.influencers.getInfluencerProfileByUserId,
+    profileIdToLoad ? { userId: profileIdToLoad } : null
+  );
+
+  // Handlers
+  const handleNicheClick = (niche) => {
+    if (selectedNiches.includes(niche)) {
+      setSelectedNiches(selectedNiches.filter(n => n !== niche));
+    } else {
+      setSelectedNiches([...selectedNiches, niche]);
+    }
+  };
+
+  const handleProfileOpen = (influencer) => {
+    setProfileIdToLoad(influencer.id);
+    setSelectedProfile(influencer);
+  };
+
+  const handleProfileClose = () => {
+    setProfileIdToLoad(null);
+    setSelectedProfile(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-primary-800">Discover Influencers</h1>
+          <p className="text-gray-600 mt-1">Find the perfect creators for your campaigns</p>
+        </div>
+        <Button className="bg-primary hover:bg-primary-600">
+          <Filter className="w-4 h-4 mr-2" />
+          Advanced Filters
+        </Button>
+      </div>
+
+      <div className="grid lg:grid-cols-4 gap-6">
+        {/* Filters Sidebar */}
+        <motion.div
+          className="lg:col-span-1"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="sticky top-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Filters
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Search */}
+              <div>
+                <Label htmlFor="search">Search</Label>
+                <div className="relative mt-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    id="search"
+                    placeholder="Search by name or handle..."
+                    className="pl-10"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+              <Separator />
+
+              {/* Followers Range */}
+              <div>
+                <Label>Followers</Label>
+                <div className="mt-3 mb-4">
+                  <Slider
+                    value={followers}
+                    onValueChange={setFollowers}
+                    max={5000000}
+                    min={1000}
+                    step={1000}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{formatNumber(followers[0])}</span>
+                  <span>{formatNumber(followers[1])}</span>
+                </div>
+              </div>
+              <Separator />
+
+              {/* Engagement Rate */}
+              <div>
+                <Label>Engagement Rate (%)</Label>
+                <div className="mt-3 mb-4">
+                  <Slider
+                    value={engagement}
+                    onValueChange={setEngagement}
+                    max={15}
+                    min={0.1}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{engagement[0]}%</span>
+                  <span>{engagement[1]}%</span>
+                </div>
+              </div>
+              <Separator />
+
+              {/* Location */}
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Select
+                  value={selectedLocation}
+                  onValueChange={setSelectedLocation}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map(loc => (
+                      <SelectItem key={loc} value={loc}>
+                        {loc}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Separator />
+
+              {/* Niche */}
+              <div>
+                <Label>Niche</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {niches.map((niche) => (
+                    <Badge
+                      key={niche}
+                      variant={selectedNiches.includes(niche) ? "default" : "outline"}
+                      className={`cursor-pointer ${
+                        selectedNiches.includes(niche)
+                          ? "bg-primary text-white"
+                          : "hover:bg-primary-50"
+                      }`}
+                      onClick={() => handleNicheClick(niche)}
+                    >
+                      {niche}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Results */}
+        <div className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-gray-600">
+              Found <span className="font-semibold">{influencers ? influencers.length : 0}</span> influencers
+            </p>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevance">Most Relevant</SelectItem>
+                <SelectItem value="followers">Most Followers</SelectItem>
+                <SelectItem value="engagement">Highest Engagement</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-6">
+            {influencers && influencers.length > 0 ? (
+              influencers.map((influencer, index) => (
+                <motion.div
+                  key={influencer.userId}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="w-16 h-16">
+                          <AvatarImage src={influencer.profilePictureUrl || "/placeholder.svg"} />
+                          <AvatarFallback>{influencer.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-lg">{influencer.name}</h3>
+                                {influencer.verified && (
+                                  <CheckCircle className="w-5 h-5 text-blue-500" />
+                                )}
+                              </div>
+                              <p className="text-gray-600">{influencer.handle}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center gap-1 mb-1">
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <span className="font-medium">{influencer.rating}</span>
+                              </div>
+                              <p className="text-sm text-gray-600">{influencer.price}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 mb-3">
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <Users className="w-4 h-4" />
+                              <span>{formatNumber(influencer.followerCount)} followers</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <TrendingUp className="w-4 h-4" />
+                              <span>{influencer.engagementRate}% engagement</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <MapPin className="w-4 h-4" />
+                              <span>{influencer.location}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 mb-4">
+                            <Badge variant="secondary">{influencer.niche}</Badge>
+                            <div className="flex items-center gap-2">
+                              {influencer.primaryPlatform?.map((platform) => (
+                                <div key={platform} className="text-gray-500">
+                                  {getPlatformIcon(platform)}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                            <p className="text-sm text-gray-700 italic">"{influencer.recentPost}"</p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <Heart className="w-4 h-4" />
+                                <span>2.4k</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>89</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Share2 className="w-4 h-4" />
+                                <span>24</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm" onClick={() => handleProfileOpen(influencer)}>
+                                View Profile
+                              </Button>
+                              <Button size="sm" className="bg-primary hover:bg-primary-600">
+                                Contact
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-10">No influencers found.</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Modal */}
+      <Dialog open={!!selectedProfile} onOpenChange={open => !open && handleProfileClose()}>
+        <DialogContent className="max-w-lg w-full">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">
+              {profileData?.name || selectedProfile?.name}
+            </h2>
+            <Button variant="ghost" size="icon" onClick={handleProfileClose}>
+              <X />
+            </Button>
+          </div>
+          {profileData ? (
+            <div>
+              <div className="flex gap-4 items-center mb-4">
+                <Avatar className="w-20 h-20">
+                  <AvatarImage src={profileData.profilePictureUrl || "/placeholder.svg"} />
+                  <AvatarFallback>{profileData.name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{profileData.handle}</span>
+                    {profileData.verified && (
+                      <CheckCircle className="w-5 h-5 text-blue-500" />
+                    )}
+                  </div>
+                  <div className="text-gray-600">{profileData.location}</div>
+                  <div className="flex gap-2 mt-2">
+                    {profileData.primaryPlatform?.map((platform) => (
+                      <span key={platform}>{getPlatformIcon(platform)}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mb-2">
+                <Badge variant="secondary">{profileData.niche}</Badge>
+              </div>
+              <div className="flex gap-4 mb-2">
+                <span><Users className="inline w-4 h-4" /> {formatNumber(profileData.followerCount || 0)} followers</span>
+                <span><TrendingUp className="inline w-4 h-4" /> {profileData.engagementRate || 0}% engagement</span>
+              </div>
+              <div className="mb-2">
+                <Star className="inline w-4 h-4 text-yellow-500" /> {profileData.rating}
+              </div>
+              <div className="mb-2 text-sm text-gray-700">
+                {profileData.bio || "No bio available."}
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-sm italic">"{profileData.recentPost}"</p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-gray-500 py-10">Loading...</div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
