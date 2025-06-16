@@ -1,20 +1,29 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { api } from "../../convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { SignedIn } from "@clerk/clerk-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, Edit, Target, MessageSquare, Star, Calendar, Clock, CheckCircle } from "lucide-react";
+import { DollarSign, Edit, Target, MessageSquare, Star, Calendar, Clock, CheckCircle, Users } from "lucide-react";
 import CampaignDiscovery from "@/components/influencer/CampaignDiscovery";
 import BrandDiscovery from "@/components/influencer/BrandDiscovery";
 import MyApplications from "@/components/influencer/MyApplications";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 const InfluencerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null);
+  const [showViewProfile, setShowViewProfile] = useState(false);
+  const { toast } = useToast();
   
   // Live data queries
   const profile = useQuery(api.users.getInfluencerProfile, {});
@@ -22,6 +31,280 @@ const InfluencerDashboard = () => {
   const activeCampaigns = useQuery(api.campaign.activeForInfluencer);
   const applications = useQuery(api.applications.listInfluencerApplications);
   const allBrands = useQuery(api.brands.listBrands);
+
+  // Mutations
+  const updateProfile = useMutation(api.users.insertProfile);
+
+  const handleViewProfile = () => {
+    setShowViewProfile(true);
+  };
+
+  const handleEditProfile = () => {
+    setEditingProfile({
+      name: profile?.name || '',
+      bio: profile?.bio || '',
+      niche: profile?.niche || '',
+      location: profile?.location || '',
+      portfolio: profile?.portfolio || [],
+      socialAccounts: profile?.socialAccounts || {
+        instagram: '',
+        tiktok: '',
+        youtube: '',
+        twitter: '',
+      },
+    });
+    setShowEditProfile(true);
+    setShowViewProfile(false);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      // Update the first portfolio item's followers if it exists, or create a new one
+      const updatedPortfolio = editingProfile.portfolio.length > 0 
+        ? [
+            {
+              ...editingProfile.portfolio[0],
+              metrics: {
+                ...editingProfile.portfolio[0].metrics,
+                followers: editingProfile.followerCount
+              }
+            },
+            ...editingProfile.portfolio.slice(1)
+          ]
+        : [{
+            type: "image",
+            title: "Profile",
+            description: "Profile metrics",
+            url: "",
+            metrics: {
+              followers: editingProfile.followerCount,
+              likes: "0",
+              comments: "0",
+              shares: "0"
+            }
+          }];
+
+      await updateProfile({
+        role: "influencer",
+        ...editingProfile,
+        portfolio: updatedPortfolio
+      });
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully",
+        variant: "success"
+      });
+      setShowEditProfile(false);
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const renderEditProfileModal = () => (
+    <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={editingProfile?.name || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                name: e.target.value
+              })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              value={editingProfile?.bio || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                bio: e.target.value
+              })}
+              rows={4}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="niche">Niche</Label>
+            <Input
+              id="niche"
+              value={editingProfile?.niche || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                niche: e.target.value
+              })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={editingProfile?.location || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                location: e.target.value
+              })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="followerCount">Follower Count</Label>
+            <Input
+              id="followerCount"
+              value={editingProfile?.portfolio?.[0]?.metrics?.followers || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                followerCount: e.target.value
+              })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Social Media Accounts</Label>
+            <div className="grid gap-2">
+              <Input
+                placeholder="Instagram"
+                value={editingProfile?.socialAccounts?.instagram || ''}
+                onChange={(e) => setEditingProfile({
+                  ...editingProfile,
+                  socialAccounts: {
+                    ...editingProfile.socialAccounts,
+                    instagram: e.target.value
+                  }
+                })}
+              />
+              <Input
+                placeholder="TikTok"
+                value={editingProfile?.socialAccounts?.tiktok || ''}
+                onChange={(e) => setEditingProfile({
+                  ...editingProfile,
+                  socialAccounts: {
+                    ...editingProfile.socialAccounts,
+                    tiktok: e.target.value
+                  }
+                })}
+              />
+              <Input
+                placeholder="YouTube"
+                value={editingProfile?.socialAccounts?.youtube || ''}
+                onChange={(e) => setEditingProfile({
+                  ...editingProfile,
+                  socialAccounts: {
+                    ...editingProfile.socialAccounts,
+                    youtube: e.target.value
+                  }
+                })}
+              />
+              <Input
+                placeholder="Twitter"
+                value={editingProfile?.socialAccounts?.twitter || ''}
+                onChange={(e) => setEditingProfile({
+                  ...editingProfile,
+                  socialAccounts: {
+                    ...editingProfile.socialAccounts,
+                    twitter: e.target.value
+                  }
+                })}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 sticky bottom-0 bg-white pt-4 border-t">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowEditProfile(false)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSaveProfile}
+            className="bg-primary-600 hover:bg-primary-700"
+          >
+            Update Profile
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
+  const renderViewProfileModal = () => (
+    <Dialog open={showViewProfile} onOpenChange={setShowViewProfile}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Profile</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6">
+          <div className="flex items-start gap-6">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-2xl">
+              {profile?.name?.charAt(0)}
+            </div>
+            <div className="flex-1 space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">{profile?.name}</h3>
+                <p className="text-sm text-gray-600">{profile?.bio}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Niche</p>
+                  <p className="font-medium">{profile?.niche || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Location</p>
+                  <p className="font-medium">{profile?.location || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Followers</p>
+                  <p className="font-medium">
+                    {profile?.portfolio?.[0]?.metrics?.followers || '0'}
+                  </p>
+                </div>
+              </div>
+              {profile?.socialAccounts && (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">Social Media</p>
+                  <div className="flex gap-4">
+                    {profile.socialAccounts.instagram && (
+                      <a href={profile.socialAccounts.instagram} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                        Instagram
+                      </a>
+                    )}
+                    {profile.socialAccounts.tiktok && (
+                      <a href={profile.socialAccounts.tiktok} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                        TikTok
+                      </a>
+                    )}
+                    {profile.socialAccounts.youtube && (
+                      <a href={profile.socialAccounts.youtube} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                        YouTube
+                      </a>
+                    )}
+                    {profile.socialAccounts.twitter && (
+                      <a href={profile.socialAccounts.twitter} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                        Twitter
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleEditProfile}>
+              Edit Profile
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   if (!profile || !allCampaigns || !activeCampaigns || !applications || !allBrands) {
     return (
@@ -35,6 +318,52 @@ const InfluencerDashboard = () => {
 
   const renderOverview = () => (
     <div className="space-y-6">
+      {/* Profile Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Profile</CardTitle>
+            <Button 
+              variant="secondary" 
+              className="bg-white text-primary-600 hover:bg-gray-100"
+              onClick={handleViewProfile}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              View Profile
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-6">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+              {profile?.name?.charAt(0)}
+            </div>
+            <div className="flex-1 space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">{profile?.name}</h3>
+                <p className="text-sm text-gray-600">{profile?.bio}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Niche</p>
+                  <p className="font-medium">{profile?.niche || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Location</p>
+                  <p className="font-medium">{profile?.location || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Followers</p>
+                  <p className="font-medium">
+                    {profile?.portfolio?.[0]?.metrics?.followers || '0'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Cards using profile data */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
@@ -230,7 +559,7 @@ const InfluencerDashboard = () => {
       <DashboardLayout userRole="influencer" userName={profile.name} userAvatar={profile.profilePictureUrl}>
         <div className="space-y-6">
           {/* Welcome Header */}
-          <motion.div className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg p-6 text-white">
+          {/* <motion.div className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold mb-2">Welcome back, {profile.name}! 👋</h1>
@@ -242,10 +571,10 @@ const InfluencerDashboard = () => {
               </div>
               <Button variant="secondary" className="bg-white text-primary-600 hover:bg-gray-100">
                 <Edit className="w-4 h-4 mr-2" />
-                Edit Profile
+                View Profile
               </Button>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Navigation Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -274,6 +603,10 @@ const InfluencerDashboard = () => {
           </Tabs>
         </div>
       </DashboardLayout>
+
+      {/* Modals */}
+      {renderEditProfileModal()}
+      {renderViewProfileModal()}
     </SignedIn>
   );
 };

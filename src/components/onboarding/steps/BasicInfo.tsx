@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +8,7 @@ interface BasicInfoData {
   lastName: string;
   bio: string;
   niche: string;
-  followerCount: number | undefined; // Changed to number | undefined
+  followerCount: string; // Changed to string
   location: string;
 }
 
@@ -85,7 +84,7 @@ const BasicInfo = ({ data, onUpdate }: BasicInfoProps) => {
               id="firstName"
               value={data.firstName}
               onChange={(e) => onUpdate({ firstName: e.target.value })}
-              placeholder="Sarah"
+              placeholder="Angie"
               className="transition-all duration-200 focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -136,8 +135,8 @@ const BasicInfo = ({ data, onUpdate }: BasicInfoProps) => {
         <div className="space-y-2">
           <Label htmlFor="followerCount">Follower Count</Label>
           <Select
-            value={getFollowerRangeString(data.followerCount)} // Make it controlled
-            onValueChange={(value) => onUpdate({ followerCount: convertFollowerRangeToNumber(value) })}
+            value={data.followerCount} // Make it controlled
+            onValueChange={(value) => onUpdate({ followerCount: value })}
           >
             <SelectTrigger className="transition-all duration-200 focus:ring-2 focus:ring-primary">
               <SelectValue placeholder="Select range" />
