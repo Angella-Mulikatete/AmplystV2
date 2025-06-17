@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { SignedIn } from "@clerk/clerk-react";
 
 interface Application {
   _id: string;
@@ -40,7 +41,7 @@ const BrandDashboard = () => {
 
   // Real-time data fetching
   const brandProfile = useQuery(api.brands.getMyBrandProfile);
-  const campaigns = useQuery(api.campaign.listMyCampaigns);
+  const campaigns = useQuery(api.campaign.listMyCampaigns, { includeExpired: false });
   const influencers = useQuery(api.influencers.listInfluencers);
   const userRole = useQuery(api.users.getMyRole);
   const applications = useQuery(api.applications.listApplications) as Application[] | undefined;
@@ -280,7 +281,7 @@ const BrandDashboard = () => {
     </Dialog>
   );
 
-  if (!campaigns || !brandProfile || !influencers || !userRole) {
+  if (!brandProfile || !campaigns || !influencers || !userRole) {
     return (
       <DashboardLayout userRole={userRole || "brand"}>
     <div className="flex justify-center p-8">
@@ -291,222 +292,109 @@ const BrandDashboard = () => {
   }
 
   return (
+    <SignedIn>
     <DashboardLayout 
       userRole={userRole} 
       userName={brandProfile.companyName} 
-      userAvatar={brandProfile.logoUrl}
+      // userAvatar={brandProfile.logoUrl}
     >
-      <div className="space-y-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Dashboard</TabsTrigger>
-            <TabsTrigger value="discover">Discover Influencers</TabsTrigger>
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-8">
-            {/* Analytics Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {analytics.map((metric) => (
-                <Card key={metric.label}>
+        <div className="space-y-6">
+          {/* Analytics Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {analytics.map((item, index) => (
+              <Card key={index}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                        <p className="text-sm text-gray-600">{metric.label}</p>
-                        <p className="text-2xl font-bold text-primary-800">{metric.value}</p>
-                  </div>
-                      {metric.icon}
+                      <p className="text-sm font-medium text-gray-500">{item.label}</p>
+                      <h3 className="text-2xl font-bold mt-1">{item.value}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{item.change}</p>
                     </div>
-                    <div className="mt-2 flex items-center text-sm">
-                      <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                      <span className="text-gray-600">{metric.change}</span>
+                    {item.icon}
                 </div>
               </CardContent>
             </Card>
               ))}
           </div>
 
-            {/* Campaign Management */}
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Campaigns Section */}
+            <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-              <CardTitle>Campaign Management</CardTitle>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate("/brand/campaigns/create")}
-                  >
-                    Create New
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Active Campaigns</CardTitle>
+                  <Button onClick={() => navigate('/brand/campaigns/create')}>
+                    Create Campaign
                   </Button>
-                </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {campaigns.map(campaign => (
-                    <div 
-                      key={campaign._id} 
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{campaign.title}</h3>
-                        <div className="flex gap-4 mt-2 text-sm text-gray-600">
-                        <span>Budget: ${campaign.budget}</span>
-                          <Badge 
-                            variant={
-                              campaign.status === 'active' ? 'default' : 
-                              campaign.status === 'draft' ? 'secondary' : 'outline'
-                            }
-                          >
-                          {campaign.status}
-                        </Badge>
-                          <span>Ends: {new Date(campaign.endDate).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    {renderCampaignActions(campaign)}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-            {/* AI-matched influencers section */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recommended Influencers</CardTitle>
-                  <Button variant="outline" size="sm">View All</Button>
-        </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Tailored matches based on your niche and campaign preferences.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <MatchedInfluencersList 
-                  niche={brandProfile.industry} 
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="discover" className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Discover Influencers</CardTitle>
-              </CardHeader>
-              <CardContent>
-          <div className="mb-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input 
-              placeholder="Search influencers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-            />
-                  </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {influencers
-                    .filter(infl => 
-                      infl.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      infl.niche?.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map(influencer => (
-              <Card key={influencer._id}>
-                <CardContent className="p-6">
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                              {influencer.name.charAt(0)}
-                            </div>
-                            <div className="flex-1">
-                    <h3 className="font-semibold">{influencer.name}</h3>
-                              <Badge variant="outline" className="mt-1">
-                                {influencer.niche}
-                              </Badge>
-                              <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                                <Users className="w-4 h-4" />
-                                <span>{influencer.followerCount?.toLocaleString() || '0'} followers</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex justify-end mt-4">
-                    <Button variant="outline" size="sm">
-                      View Profile
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="applications" className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Applications</CardTitle>
-                <p className="text-sm text-gray-500 mt-1">
-                  Review and manage influencer applications for your campaigns
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {applications?.length > 0 ? (
-                    applications.map((application) => (
-                      <div 
-                        key={application._id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  {campaigns?.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No active campaigns yet</p>
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={() => navigate('/brand/campaigns/create')}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                              {application.influencerName?.charAt(0)}
-                            </div>
+                        Create Your First Campaign
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {campaigns?.map((campaign) => (
+                        <div key={campaign._id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold">{application.influencerName}</h3>
-                              <p className="text-sm text-gray-600">{application.campaignTitle}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge 
-                                  variant={
-                                    application.status === 'pending' ? 'secondary' :
-                                    application.status === 'approved' ? 'default' :
-                                    'destructive'
-                                  }
-                                >
-                                  {application.status}
-                                </Badge>
-                                <span className="text-sm text-gray-500">
-                                  {new Date(application._creationTime).toLocaleDateString()}
-                                </span>
-                              </div>
+                              <h3 className="font-semibold">{campaign.title}</h3>
+                              <p className="text-sm text-gray-500">{campaign.description}</p>
                             </div>
+                            <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
+                              {campaign.status}
+                              </Badge>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedApplication(application);
-                            setShowApplicationModal(true);
-                          }}
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    ))
+                      ))}
+                  </div>
+                  )}
+                </CardContent>
+              </Card>
+          </div>
+
+            {/* Applications Section */}
+            <div>
+            <Card>
+              <CardHeader>
+                  <CardTitle>Recent Applications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  {applications?.length === 0 ? (
+                    <p className="text-center text-gray-500 py-4">No applications yet</p>
                   ) : (
-                    <div className="text-center py-8">
-                      <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
-                      <p className="text-gray-600">Applications from influencers will appear here</p>
+                <div className="space-y-4">
+                      {applications?.slice(0, 5).map((application) => (
+                        <div key={application._id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold">{application.influencerName}</h3>
+                              <p className="text-sm text-gray-500">{application.campaignTitle}</p>
+                            </div>
+                            <Badge variant={
+                              application.status === 'approved' ? 'default' :
+                              application.status === 'rejected' ? 'destructive' :
+                              'secondary'
+                            }>
+                              {application.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
         </div>
       )}
-                </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+            </div>
+          </div>
       </div>
 
       {/* Modals */}
@@ -538,6 +426,7 @@ const BrandDashboard = () => {
       </Dialog>
       {renderApplicationModal()}
     </DashboardLayout>
+    </SignedIn>
   );
 };
 

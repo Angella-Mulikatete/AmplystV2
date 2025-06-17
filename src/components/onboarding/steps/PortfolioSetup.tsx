@@ -79,19 +79,14 @@ const PortfolioSetup: React.FC<PortfolioSetupProps> = ({ data, onUpdate }) => {
 
    // Add auto-generation of portfolio items from social media data
   const generateFromSocialMedia = () => {
-    if (!data.profileData || !data.primaryPlatform) return;
+    if (!data.profileData) return;
     
-    const platform = data.primaryPlatform;
-    const profileData = data.profileData[platform];
+    const newPortfolioItems: PortfolioItemWithoutId[] = [];
     
-    if (!profileData) return;
-    
-    // Create a sample portfolio item based on platform
-    let newPortfolioItem: PortfolioItemWithoutId;
-    
-    if (platform === "tiktok") {
-      const tiktokData = profileData as TikTokProfileData;
-      newPortfolioItem = {
+    // Generate for TikTok if available
+    if (data.profileData.tiktok) {
+      const tiktokData = data.profileData.tiktok;
+      newPortfolioItems.push({
         type: "video",
         title: `TikTok Content by @${tiktokData.name || "me"}`,
         description: `Engaging TikTok content with ${tiktokData.fans || 0} followers`,
@@ -102,31 +97,35 @@ const PortfolioSetup: React.FC<PortfolioSetupProps> = ({ data, onUpdate }) => {
           comments: "0", // TikTok API doesn't provide this
           shares: "0"    // TikTok API doesn't provide this
         }
-      };
-    } else if (platform === "instagram") {
-      const instaData = profileData as InstagramProfileData;
-      newPortfolioItem = {
+      });
+    }
+    
+    // Generate for Instagram if available
+    if (data.profileData.instagram) {
+      const instaData = data.profileData.instagram;
+      newPortfolioItems.push({
         type: "image",
         title: `Instagram Content by @${instaData.username || "me"}`,
         description: instaData.biography || "My Instagram content",
-        url: instaData.url || `https://instagram.com/${instaData.username}`,
+        url: instaData.profilePicUrl || `https://instagram.com/${instaData.username}`,
         metrics: {
           followers: instaData.followersCount?.toString() || "0",
           likes: "0", // Instagram API doesn't provide this
           comments: "0", // Instagram API doesn't provide this
           shares: "0"    // Instagram API doesn't provide this
         }
-      };
-    } else {
-      return;
+      });
     }
     
-    // Add to portfolio
-    onUpdate({
-      portfolio: [...(data.portfolio || []), { ...newPortfolioItem, id: Date.now() }]
-    });
+    if (newPortfolioItems.length > 0) {
+      // Add all new portfolio items
+      onUpdate({
+        portfolio: [...(data.portfolio || []), ...newPortfolioItems.map(item => ({ ...item, id: Date.now() + Math.random() }))]
+      });
 
-    setNewItem(newPortfolioItem);
+      // Set the first item as the current new item
+      setNewItem(newPortfolioItems[0]);
+    }
   };
 
   return (
@@ -226,7 +225,7 @@ const PortfolioSetup: React.FC<PortfolioSetupProps> = ({ data, onUpdate }) => {
               className="w-full bg-primary hover:bg-primary-600" 
               onClick={generateFromSocialMedia}
             >
-              Generate portfolio from Social Media
+              Generate portfolio from Connected Social Media
             </Button>
           </div>
         </CardContent>

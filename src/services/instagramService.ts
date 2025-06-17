@@ -1,8 +1,11 @@
 // https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs?token=apify_api_7duCuWXWiRN2DJNi5aEVSalzmMhEc12ijzrz
+//https://console.apify.com/view/runs/no77tEr71axHecaNX
+//https://api.apify.com/v2/actor-runs/no77tEr71axHecaNX?token=apify_api_7duCuWXWiRN2DJNi5aEVSalzmMhEc12ijzrz
 import axios from "axios";
 
 const APIFY_TOKEN = "apify_api_7duCuWXWiRN2DJNi5aEVSalzmMhEc12ijzrz";
-const INSTAGRAM_ACTOR_ID = "apify~instagram-profile-scraper";
+const INSTAGRAM_ACTOR_ID = "apify/instagram-profile-scraper";
+const RUN_ID="no77tEr71axHecaNX";
 
 
 export interface InstagramProfileData {
@@ -46,8 +49,13 @@ export async function runInstagramActor(usernames: string): Promise<InstagramPro
   };
 
   // Start the actor run
+  // const runResponse = await axios.post(
+  //   `https://api.apify.com/v2/acts/${INSTAGRAM_ACTOR_ID}/runs?token=${APIFY_TOKEN}`,
+  //   input
+  // );
+
   const runResponse = await axios.post(
-    `https://api.apify.com/v2/acts/${INSTAGRAM_ACTOR_ID}/runs?token=${APIFY_TOKEN}`,
+    "https://api.apify.com/v2/acts/urbACh26VF8yHR72m/runs?token=apify_api_7duCuWXWiRN2DJNi5aEVSalzmMhEc12ijzrz",
     input
   );
 
@@ -69,7 +77,7 @@ export async function runInstagramActor(usernames: string): Promise<InstagramPro
     await new Promise((r) => setTimeout(r, 3000)); // wait 3 seconds
 
     const runStatusResponse = await axios.get(
-      `https://api.apify.com/v2/acts/${INSTAGRAM_ACTOR_ID}/runs/${runId}?token=${APIFY_TOKEN}`
+      "https://api.apify.com/v2/actor-runs/no77tEr71axHecaNX?token=apify_api_7duCuWXWiRN2DJNi5aEVSalzmMhEc12ijzrz"
     );
 
     runStatus = runStatusResponse.data.data.status;

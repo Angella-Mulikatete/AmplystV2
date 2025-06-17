@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Users, Target, TrendingUp, Star } from "lucide-react";
@@ -9,8 +8,28 @@ interface OnboardingData {
   lastName: string;
   niche: string;
   role: string;
-  followerCount: number;
+  followerCount: string;
   location: string;
+  bio: string;
+  socialAccounts: {
+    instagram: string;
+    tiktok: string;
+    youtube: string;
+    twitter: string;
+  };
+  portfolio: Array<{
+    id?: number;
+    type: string;
+    title: string;
+    description: string;
+    url: string;
+    metrics: {
+      followers: string;
+      likes: string;
+      comments: string;
+      shares: string;
+    };
+  }>;
 }
 
 interface CompletionStepProps {

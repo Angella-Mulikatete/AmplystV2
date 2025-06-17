@@ -1,6 +1,3 @@
-
-
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +23,7 @@ interface InfluencerFormData {
   bio: string;
   niche: string;
   location: string;
-  followerCount: number;
+  followerCount: string;
   socialAccounts: SocialMediaAccount;
   portfolio: PortfolioItem[];
   profileData?: SocialMediaProfileData;
@@ -42,7 +39,7 @@ const InfluencerOnboarding = () => {
     role: "",
     niche: "",
     location: "",
-    followerCount: 0,
+    followerCount: "0",
     socialAccounts: {
       instagram: "",
       tiktok: "",
@@ -96,6 +93,21 @@ const InfluencerOnboarding = () => {
   const handleComplete = async () => {
     try {
       console.log("Submitting profile data:", formData);
+      
+      // Ensure portfolio has at least one item with follower count
+      const portfolio = formData.portfolio.length > 0 ? formData.portfolio : [{
+        type: "image",
+        title: "Profile",
+        description: "Profile metrics",
+        url: "",
+        metrics: {
+          followers: formData.followerCount || "0",
+          likes: "0",
+          comments: "0",
+          shares: "0"
+        }
+      }];
+
       // Compose the profile data from formData
       await insertProfile({
         role: "influencer",
@@ -104,10 +116,15 @@ const InfluencerOnboarding = () => {
         profilePictureUrl: user?.imageUrl,
         niche: formData.niche,
         location: formData.location,
-        followerCount: formData.followerCount || 0, // Ensure it's a number, default to 0 if invalid or undefined
         socialAccounts: formData.socialAccounts,
-        portfolio: formData.portfolio,
-        // Add more fields as needed, matching your Convex schema
+        portfolio: portfolio.map(item => ({
+          ...item,
+          id: item.id || 0,
+          metrics: {
+            ...item.metrics,
+            followers: formData.followerCount
+          }
+        })),
       });
       navigate("/influencer/dashboard");
     } catch (err) {

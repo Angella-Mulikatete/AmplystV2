@@ -121,7 +121,13 @@ const applicationTables = {
     title: v.string(),
     description: v.string(),
     budget: v.optional(v.number()),
-    status: v.string(), // "draft", "active", "completed", "archived"
+    status: v.union(
+      v.literal("draft"),
+      v.literal("active"),
+      v.literal("completed"),
+      v.literal("archived"),
+      v.literal("expired")
+    ),
     targetAudience: v.optional(v.string()),
     contentTypes: v.optional(v.array(v.string())),
     duration: v.optional(v.string()),
@@ -130,9 +136,11 @@ const applicationTables = {
     endDate: v.optional(v.string()),
     requirements: v.optional(v.string()),
     niche: v.optional(v.string()),
-    
+    expiredAt: v.optional(v.string()), // When the campaign was marked as expired
     // Add more campaign fields as needed
-  }).index("by_creatorUserId", ["creatorUserId"]),
+  }).index("by_creatorUserId", ["creatorUserId"])
+    .index("by_status", ["status"])
+    .index("by_expired", ["expiredAt"]),
 
   applications: defineTable({
     campaignId: v.id("campaigns"),

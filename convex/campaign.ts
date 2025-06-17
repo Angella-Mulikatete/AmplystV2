@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { Doc, Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
   export const createCampaign = mutation({
       args: {
@@ -13,7 +14,13 @@ import { Doc, Id } from "./_generated/dataModel";
         title: v.string(),
         description: v.string(),
         budget: v.optional(v.number()),
-        status: v.string(), // e.g., "draft", "active"
+        status: v.union(
+          v.literal("draft"),
+          v.literal("active"),
+          v.literal("completed"),
+          v.literal("archived"),
+          v.literal("expired")
+        ),
         targetAudience: v.optional(v.string()),
         contentTypes: v.optional(v.array(v.string())),
         startDate: v.optional(v.string()),
@@ -59,37 +66,38 @@ import { Doc, Id } from "./_generated/dataModel";
     });
 
   export const listMyCampaigns = query({
-    handler: async (ctx) => {
+    args: {
+      includeExpired: v.optional(v.boolean()),
+    },
+    handler: async (ctx, args) => {
       const identity = await ctx.auth.getUserIdentity();
-      if (!identity) return [];
+      if (!identity) {
+        console.log("No identity found");
+        return []; // Return empty array instead of throwing
+      }
 
-      const brand = await ctx.db
+      // Find the user
+      const user = await ctx.db
         .query("users")
         .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
         .unique();
-      if (!brand) return [];
+
+      if (!user) {
+        console.log("User not found");
+        return []; // Return empty array if user doesn't exist
+      }
 
       const campaigns = await ctx.db
         .query("campaigns")
-        .withIndex("by_creatorUserId", q => q.eq("creatorUserId", brand._id))
+        .withIndex("by_creatorUserId", (q) => q.eq("creatorUserId", user._id))
+        .filter((q) => 
+          args.includeExpired 
+            ? q.eq(q.field("status"), q.field("status")) // Always true
+            : q.neq(q.field("status"), "expired")
+        )
         .collect();
 
-      // Get applications for each campaign
-      const campaignsWithApplications = await Promise.all(
-        campaigns.map(async (campaign) => {
-          // Get applications for this campaign using campaignId field
-          const applications = await ctx.db
-            .query("applications")
-            .filter(q => q.eq(q.field("campaignId"), campaign._id))
-            .collect();
-          return {
-            ...campaign,
-            applications,
-          };
-        })
-      );
-
-      return campaignsWithApplications;
+      return campaigns;
     },
   });
 
@@ -325,7 +333,13 @@ import { Doc, Id } from "./_generated/dataModel";
       title: v.optional(v.string()),
       description: v.optional(v.string()),
       budget: v.optional(v.number()),
-      status: v.optional(v.string()),
+      status: v.optional(v.union(
+        v.literal("draft"),
+        v.literal("active"),
+        v.literal("completed"),
+        v.literal("archived"),
+        v.literal("expired")
+      )),
       targetAudience: v.optional(v.string()),
       contentTypes: v.optional(v.array(v.string())),
       duration: v.optional(v.string()),
@@ -424,30 +438,49 @@ import { Doc, Id } from "./_generated/dataModel";
     },
   });
 
-  // Function to check for expired campaigns
+  // Check for expired campaigns and mark them as expired
   export const checkExpiredCampaigns = mutation({
     handler: async (ctx) => {
       const now = new Date().toISOString();
       
-      // Find all active campaigns that have expired
+      // Find all active campaigns that have passed their end date
       const expiredCampaigns = await ctx.db
         .query("campaigns")
-        .filter(q => 
-          q.and(
-            q.eq(q.field("status"), "active"),
-            q.lt(q.field("endDate"), now)
-          )
-        )
+        .withIndex("by_status", (q) => q.eq("status", "active"))
+        .filter((q) => q.lt(q.field("endDate"), now))
         .collect();
 
-      // Update expired campaigns to "expired" status
+      // Mark campaigns as expired
       for (const campaign of expiredCampaigns) {
         await ctx.db.patch(campaign._id, {
-          status: "expired"
+          status: "expired",
+          expiredAt: now
         });
       }
 
       return expiredCampaigns.length;
+    },
+  });
+
+  // Delete campaigns that have been expired for more than 7 days
+  export const deleteExpiredCampaigns = mutation({
+    handler: async (ctx) => {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      
+      // Find all expired campaigns that have been expired for more than 7 days
+      const campaignsToDelete = await ctx.db
+        .query("campaigns")
+        .withIndex("by_status", (q) => q.eq("status", "expired"))
+        .filter((q) => q.lt(q.field("expiredAt"), sevenDaysAgo))
+        .collect();
+
+      // Delete the campaigns
+      for (const campaign of campaignsToDelete) {
+        await ctx.db.delete(campaign._id);
+      }
+
+      return campaignsToDelete.length;
     },
   });
 

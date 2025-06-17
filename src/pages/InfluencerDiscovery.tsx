@@ -402,47 +402,24 @@ import {
   MessageCircle,
   Share2,
   Star,
-  CheckCircle,
-  X
+  CheckCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 
-const niches = [
-  "Fashion", "Beauty", "Technology", "Fitness", "Food", "Travel",
-  "Lifestyle", "Gaming", "Music", "Art", "Sports", "Business"
-];
-const locations = ["Uganda", "UK", "Germany", "Kenya", "Nigeria", "United States", "Canada", "Australia"];
-
-const getPlatformIcon = (platform) => {
-  switch (platform) {
-    case 'instagram':
-      return <Instagram className="w-4 h-4" />;
-    case 'twitter':
-      return <Twitter className="w-4 h-4" />;
-    case 'youtube':
-      return <Youtube className="w-4 h-4" />;
-    default:
-      return null;
-  }
-};
-
-const formatNumber = (num) => {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-  return num.toString();
-};
-
-export default function InfluencerDiscovery() {
-  // Filter states
+const InfluencerDiscovery = () => {
   const [followers, setFollowers] = useState([10000, 1000000]);
   const [engagement, setEngagement] = useState([2, 10]);
-  const [selectedNiches, setSelectedNiches] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("relevance");
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  const [profileIdToLoad, setProfileIdToLoad] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [sortBy, setSortBy] = useState("followerCount");
+
+  const niches = [
+    "Fashion", "Beauty", "Technology", "Fitness", "Food", "Travel", 
+    "Lifestyle", "Gaming", "Music", "Art", "Sports", "Business"
+  ];
+
+  const locations = ["Uganda", "UK", "Germany", "Kenya", "Nigeria"];
 
   // Query influencers from backend
   const influencers = useQuery(api.influencers.filterInfluencers, {
@@ -452,39 +429,32 @@ export default function InfluencerDiscovery() {
     location: selectedLocation || undefined,
     minEngagement: engagement[0],
     maxEngagement: engagement[1],
-    // location: selectedLocation || undefined,
     search: search || undefined,
     sortBy,
     sortOrder: sortBy === "followers" || sortBy === "engagement" || sortBy === "rating" ? "desc" : undefined,
-  });
+  }) || [];
 
-  // Profile modal data (fetch when profileIdToLoad is set)
-  const profileData = useQuery(
-    api.influencers.getInfluencerProfileByUserId,
-    profileIdToLoad ? { userId: profileIdToLoad } : null
-  );
-
-  // Handlers
-  const handleNicheClick = (niche) => {
-    if (selectedNiches.includes(niche)) {
-      setSelectedNiches(selectedNiches.filter(n => n !== niche));
-    } else {
-      setSelectedNiches([...selectedNiches, niche]);
+  const getPlatformIcon = (platform: string) => {
+    switch (platform) {
+      case 'instagram':
+        return <Instagram className="w-4 h-4" />;
+      case 'twitter':
+        return <Twitter className="w-4 h-4" />;
+      case 'youtube':
+        return <Youtube className="w-4 h-4" />;
+      default:
+        return null;
     }
   };
 
-  const handleProfileOpen = (influencer) => {
-    setProfileIdToLoad(influencer.id);
-    setSelectedProfile(influencer);
-  };
-
-  const handleProfileClose = () => {
-    setProfileIdToLoad(null);
-    setSelectedProfile(null);
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -499,7 +469,7 @@ export default function InfluencerDiscovery() {
 
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Filters Sidebar */}
-        <motion.div
+        <motion.div 
           className="lg:col-span-1"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -523,10 +493,11 @@ export default function InfluencerDiscovery() {
                     placeholder="Search by name or handle..."
                     className="pl-10"
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
               </div>
+
               <Separator />
 
               {/* Followers Range */}
@@ -547,6 +518,7 @@ export default function InfluencerDiscovery() {
                   <span>{formatNumber(followers[1])}</span>
                 </div>
               </div>
+
               <Separator />
 
               {/* Engagement Rate */}
@@ -567,27 +539,25 @@ export default function InfluencerDiscovery() {
                   <span>{engagement[1]}%</span>
                 </div>
               </div>
+
               <Separator />
 
               {/* Location */}
               <div>
                 <Label htmlFor="location">Location</Label>
-                <Select
-                  value={selectedLocation}
-                  onValueChange={setSelectedLocation}
-                >
+                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {locations.map(loc => (
-                      <SelectItem key={loc} value={loc}>
-                        {loc}
-                      </SelectItem>
+                    <SelectItem value="">All Locations</SelectItem>
+                    {locations.map((location) => (
+                      <SelectItem key={location} value={location}>{location}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
               <Separator />
 
               {/* Niche */}
@@ -603,7 +573,13 @@ export default function InfluencerDiscovery() {
                           ? "bg-primary text-white"
                           : "hover:bg-primary-50"
                       }`}
-                      onClick={() => handleNicheClick(niche)}
+                      onClick={() => {
+                        if (selectedNiches.includes(niche)) {
+                          setSelectedNiches(selectedNiches.filter(n => n !== niche));
+                        } else {
+                          setSelectedNiches([...selectedNiches, niche]);
+                        }
+                      }}
                     >
                       {niche}
                     </Badge>
@@ -618,82 +594,87 @@ export default function InfluencerDiscovery() {
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-6">
             <p className="text-gray-600">
-              Found <span className="font-semibold">{influencers ? influencers.length : 0}</span> influencers
+              Found <span className="font-semibold">{influencers.length}</span> influencers
             </p>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="relevance">Most Relevant</SelectItem>
-                <SelectItem value="followers">Most Followers</SelectItem>
-                <SelectItem value="engagement">Highest Engagement</SelectItem>
+                <SelectItem value="followerCount">Most Followers</SelectItem>
+                <SelectItem value="engagementRate">Highest Engagement</SelectItem>
                 <SelectItem value="rating">Highest Rated</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
           <div className="grid gap-6">
-            {influencers && influencers.length > 0 ? (
+            {influencers.length > 0 ? (
               influencers.map((influencer, index) => (
                 <motion.div
-                  key={influencer.userId}
+                  key={influencer._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   <Card className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <Avatar className="w-16 h-16">
-                          <AvatarImage src={influencer.profilePictureUrl || "/placeholder.svg"} />
-                          <AvatarFallback>{influencer.name?.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={influencer.profilePictureUrl || "/placeholder.jpg"} />
+                          <AvatarFallback>{influencer.name?.charAt(0) || "U"}</AvatarFallback>
                         </Avatar>
+
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-2">
                             <div>
                               <div className="flex items-center gap-2">
                                 <h3 className="font-semibold text-lg">{influencer.name}</h3>
-                                {influencer.verified && (
-                                  <CheckCircle className="w-5 h-5 text-blue-500" />
-                                )}
+                                <CheckCircle className="w-5 h-5 text-blue-500" />
                               </div>
-                              <p className="text-gray-600">{influencer.handle}</p>
+                              <p className="text-gray-600">@{influencer.userId || "username"}</p>
                             </div>
+                            
                             <div className="text-right">
                               <div className="flex items-center gap-1 mb-1">
                                 <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                <span className="font-medium">{influencer.rating}</span>
+                                <span className="font-medium">4.8</span>
                               </div>
-                              <p className="text-sm text-gray-600">{influencer.price}</p>
+                              <p className="text-sm text-gray-600">$500-1000</p>
                             </div>
                           </div>
+
                           <div className="flex items-center gap-4 mb-3">
                             <div className="flex items-center gap-1 text-sm text-gray-600">
                               <Users className="w-4 h-4" />
-                              <span>{formatNumber(influencer.followerCount)} followers</span>
+                              <span>{formatNumber(influencer.followerCount || 0)} followers</span>
                             </div>
-                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                              <TrendingUp className="w-4 h-4" />
-                              <span>{influencer.engagementRate}% engagement</span>
-                            </div>
+                            {influencer.engagementRate && (
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>{influencer.engagementRate}% engagement</span>
+                              </div>
+                            )}
                             <div className="flex items-center gap-1 text-sm text-gray-600">
                               <MapPin className="w-4 h-4" />
                               <span>{influencer.location}</span>
                             </div>
                           </div>
+
                           <div className="flex items-center gap-3 mb-4">
                             <Badge variant="secondary">{influencer.niche}</Badge>
                             <div className="flex items-center gap-2">
-                              {influencer.primaryPlatform?.map((platform) => (
-                                <div key={platform} className="text-gray-500">
-                                  {getPlatformIcon(platform)}
-                                </div>
-                              ))}
+                              {getPlatformIcon('instagram')}
+                              {getPlatformIcon('youtube')}
                             </div>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                            <p className="text-sm text-gray-700 italic">"{influencer.recentPost}"</p>
-                          </div>
+
+                          {influencer.bio && (
+                            <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                              <p className="text-sm text-gray-700 italic">"{influencer.bio}"</p>
+                            </div>
+                          )}
+
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 text-sm text-gray-600">
                               <div className="flex items-center gap-1">
@@ -709,12 +690,13 @@ export default function InfluencerDiscovery() {
                                 <span>24</span>
                               </div>
                             </div>
+
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm" onClick={() => handleProfileOpen(influencer)}>
+                              <Button variant="outline" size="sm">
                                 View Profile
                               </Button>
                               <Button size="sm" className="bg-primary hover:bg-primary-600">
-                                Contact
+                                Invite to Campaign
                               </Button>
                             </div>
                           </div>
@@ -725,67 +707,15 @@ export default function InfluencerDiscovery() {
                 </motion.div>
               ))
             ) : (
-              <div className="text-center text-gray-500 py-10">No influencers found.</div>
+              <div className="text-gray-500 text-center py-8">
+                No influencers match your filters.
+              </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Profile Modal */}
-      <Dialog open={!!selectedProfile} onOpenChange={open => !open && handleProfileClose()}>
-        <DialogContent className="max-w-lg w-full">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">
-              {profileData?.name || selectedProfile?.name}
-            </h2>
-            <Button variant="ghost" size="icon" onClick={handleProfileClose}>
-              <X />
-            </Button>
-          </div>
-          {profileData ? (
-            <div>
-              <div className="flex gap-4 items-center mb-4">
-                <Avatar className="w-20 h-20">
-                  <AvatarImage src={profileData.profilePictureUrl || "/placeholder.svg"} />
-                  <AvatarFallback>{profileData.name?.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{profileData.handle}</span>
-                    {profileData.verified && (
-                      <CheckCircle className="w-5 h-5 text-blue-500" />
-                    )}
-                  </div>
-                  <div className="text-gray-600">{profileData.location}</div>
-                  <div className="flex gap-2 mt-2">
-                    {profileData.primaryPlatform?.map((platform) => (
-                      <span key={platform}>{getPlatformIcon(platform)}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="mb-2">
-                <Badge variant="secondary">{profileData.niche}</Badge>
-              </div>
-              <div className="flex gap-4 mb-2">
-                <span><Users className="inline w-4 h-4" /> {formatNumber(profileData.followerCount || 0)} followers</span>
-                <span><TrendingUp className="inline w-4 h-4" /> {profileData.engagementRate || 0}% engagement</span>
-              </div>
-              <div className="mb-2">
-                <Star className="inline w-4 h-4 text-yellow-500" /> {profileData.rating}
-              </div>
-              <div className="mb-2 text-sm text-gray-700">
-                {profileData.bio || "No bio available."}
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-sm italic">"{profileData.recentPost}"</p>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-gray-500 py-10">Loading...</div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
-}
+};
+
+export default InfluencerDiscovery;

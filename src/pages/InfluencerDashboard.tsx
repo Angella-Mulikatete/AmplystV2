@@ -263,7 +263,7 @@ const InfluencerDashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600">Followers</p>
                   <p className="font-medium">
-                    {profile?.portfolio?.[0]?.metrics?.followers || '0'}
+                    {profile?.portfolio?.find(item => item.type === 'image')?.metrics?.followers || '0'}
                   </p>
                 </div>
               </div>
@@ -355,7 +355,7 @@ const InfluencerDashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600">Followers</p>
                   <p className="font-medium">
-                    {profile?.portfolio?.[0]?.metrics?.followers || '0'}
+                    {profile?.portfolio?.find(item => item.type === 'image')?.metrics?.followers || '0'}
                   </p>
                 </div>
               </div>
@@ -385,7 +385,7 @@ const InfluencerDashboard = () => {
               <div>
                 <p className="text-sm text-gray-600">Active Campaigns</p>
                 <p className="text-2xl font-bold text-primary-800">
-                  {activeCampaigns.length}
+                  {activeCampaigns.filter(campaign => campaign.status === 'active').length}
                 </p>
               </div>
               <Target className="w-8 h-8 text-blue-500" />
@@ -411,7 +411,7 @@ const InfluencerDashboard = () => {
               <div>
                 <p className="text-sm text-gray-600">Available Campaigns</p>
                 <p className="text-2xl font-bold text-primary-800">
-                  {allCampaigns.length}
+                  {allCampaigns.filter(campaign => campaign.status === 'active').length}
                 </p>
               </div>
               <Star className="w-8 h-8 text-yellow-500" />
@@ -435,54 +435,56 @@ const InfluencerDashboard = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {activeCampaigns.length > 0 ? (
+          {activeCampaigns.filter(campaign => campaign.status === 'active').length > 0 ? (
             <div className="space-y-4">
-              {activeCampaigns.map((campaign) => (
-                <motion.div
-                  key={campaign._id}
-                  className="p-4 border rounded-lg hover:bg-gray-50"
-                  whileHover={{ scale: 1.01 }}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-lg">{campaign.title}</h3>
-                      <p className="text-sm text-gray-600">by {campaign.creatorUserId}</p>
+              {activeCampaigns
+                .filter(campaign => campaign.status === 'active')
+                .map((campaign) => (
+                  <motion.div
+                    key={campaign._id}
+                    className="p-4 border rounded-lg hover:bg-gray-50"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-lg">{campaign.title}</h3>
+                        <p className="text-sm text-gray-600">by {campaign.creatorUserId}</p>
+                      </div>
+                      <Badge 
+                        variant="default"
+                        className="bg-green-100 text-green-800"
+                      >
+                        Active
+                      </Badge>
                     </div>
-                    <Badge 
-                      variant={campaign.status === 'active' ? 'default' : 'secondary'}
-                      className={campaign.status === 'active' ? 'bg-green-100 text-green-800' : ''}
-                    >
-                      {campaign.status}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-green-500" />
-                      <span>${campaign.budget?.toLocaleString() ?? 'N/A'}</span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-green-500" />
+                        <span>${campaign.budget?.toLocaleString() ?? 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-blue-500" />
+                        <span>Ends: {new Date(campaign.endDate).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-purple-500" />
+                        <span>{campaign.targetAudience || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <span>{campaign.contentTypes?.join(', ') || 'N/A'}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-500" />
-                      <span>Ends: {new Date(campaign.endDate).toLocaleDateString()}</span>
+                    <div className="mt-4 flex justify-end gap-2">
+                      <Button variant="outline" size="sm">
+                        View Details
+                      </Button>
+                      <Button size="sm">
+                        Upload Content
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Target className="h-4 w-4 text-purple-500" />
-                      <span>{campaign.targetAudience || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4 text-yellow-500" />
-                      <span>{campaign.contentTypes?.join(', ') || 'N/A'}</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                    <Button size="sm">
-                      Upload Content
-                    </Button>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
             </div>
           ) : (
             <div className="text-center py-8">
@@ -518,11 +520,11 @@ const InfluencerDashboard = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      {application.brandName?.charAt(0)}
+                      {application.campaignTitle?.charAt(0)}
                     </div>
                     <div>
                       <h3 className="font-semibold">{application.campaignTitle}</h3>
-                      <p className="text-sm text-gray-600">{application.brandName}</p>
+                      <p className="text-sm text-gray-600">{application.influencerName}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge 
                           variant={

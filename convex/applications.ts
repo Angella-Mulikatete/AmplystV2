@@ -8,7 +8,7 @@ export const listApplications = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Not authenticated");
+      return [];
     }
 
     // Get the user's brand profile
@@ -18,7 +18,7 @@ export const listApplications = query({
       .first();
 
     if (!user || user.role !== "brand") {
-      throw new Error("Not authorized");
+      return [];
     }
 
     // Get the brand profile
@@ -28,7 +28,7 @@ export const listApplications = query({
       .first();
 
     if (!brandProfile) {
-      throw new Error("Brand profile not found");
+      return [];
     }
 
     // Get all applications for the brand's campaigns
@@ -43,7 +43,7 @@ export const listApplications = query({
         const campaign = await ctx.db.get(application.campaignId);
         const influencer = await ctx.db.get(application.influencerId);
         if (!influencer) {
-          throw new Error("Influencer not found");
+          return application;
         }
         const influencerProfile = await ctx.db
           .query("profiles")
@@ -186,47 +186,26 @@ export const updateApplication = mutation({
 
 // List all applications for an influencer
 export const listInfluencerApplications = query({
-  args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Not authenticated");
+      return [];
     }
 
-    // Get the user's profile
+    // Get the user first
     const user = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .first();
+      .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
 
     if (!user || user.role !== "influencer") {
-      throw new Error("Not authorized");
+      return [];
     }
 
-    // Get all applications for the influencer
-    const applications = await ctx.db
+    // Then get applications for this user
+    return await ctx.db
       .query("applications")
-      .withIndex("by_influencer", (q) => q.eq("influencerId", user._id))
+      .withIndex("by_influencer", q => q.eq("influencerId", user._id))
       .collect();
-
-    // Get additional details for each application
-    const applicationsWithDetails = await Promise.all(
-      applications.map(async (application) => {
-        const campaign = await ctx.db.get(application.campaignId);
-        const brandProfile = await ctx.db
-          .query("brands")
-          .filter((q) => q.eq(q.field("_id"), application.brandId))
-          .first();
-
-        return {
-          ...application,
-          campaignTitle: campaign?.title,
-          brandName: brandProfile?.companyName,
-          brandLogo: brandProfile?.logoUrl,
-        };
-      })
-    );
-
-    return applicationsWithDetails;
   },
 }); 

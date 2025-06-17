@@ -133,12 +133,22 @@ export default function CampaignCreation() {
             <SelectValue placeholder="Select campaign category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="fashion">Fashion & Beauty</SelectItem>
+            <SelectItem value="fashion">Fashion & Style</SelectItem>
             <SelectItem value="tech">Technology</SelectItem>
             <SelectItem value="lifestyle">Lifestyle</SelectItem>
             <SelectItem value="fitness">Health & Fitness</SelectItem>
             <SelectItem value="food">Food & Beverage</SelectItem>
+            <SelectItem value="Beauty & Skincare">Beauty & Skincare</SelectItem>
+            <SelectItem value="Food & Cooking">Food & Cooking</SelectItem>
+            <SelectItem value="Gaming">Gaming</SelectItem>
             <SelectItem value="travel">Travel</SelectItem>
+            <SelectItem value="Education">Education</SelectItem>
+            <SelectItem value="Entertainment">Entertainment</SelectItem>
+            <SelectItem value="Home & Garden">Home & Garden</SelectItem>
+            <SelectItem value="Arts & Crafts">Arts & Crafts</SelectItem>
+            <SelectItem value="Music">Music</SelectItem>
+            <SelectItem value="Photography">Photography</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -257,6 +267,8 @@ export default function CampaignCreation() {
             <SelectValue placeholder="Select target location" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="ug">Uganda</SelectItem>
+            <SelectItem value="ke">Kenya</SelectItem>
             <SelectItem value="us">United States</SelectItem>
             <SelectItem value="uk">United Kingdom</SelectItem>
             <SelectItem value="ca">Canada</SelectItem>

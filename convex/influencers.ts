@@ -8,73 +8,77 @@ export const filterInfluencers = query({
     niche: v.optional(v.string()),
     minFollowers: v.optional(v.number()),
     maxFollowers: v.optional(v.number()),
+    location: v.optional(v.string()),
     minEngagement: v.optional(v.number()),
     maxEngagement: v.optional(v.number()),
-    location: v.optional(v.string()),
     search: v.optional(v.string()),
-    sortBy: v.optional(v.string()), // "followers", "engagement", etc.
-    sortOrder: v.optional(v.string()), // "asc" or "desc"
+    sortBy: v.optional(v.string()),
+    sortOrder: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("profiles").filter(q => q.eq(q.field("role"), "influencer"));
+    // Start with base query for profiles with role "influencer"
+    let influencersQuery = ctx.db
+      .query("profiles")
+      .filter(q => q.eq(q.field("role"), "influencer"));
 
+    // Apply filters if provided
     if (args.niche) {
-      q = q.filter(q => q.eq(q.field("niche"), args.niche));
-    }
-    if (args.location) {
-      q = q.filter(q => q.eq(q.field("location"), args.location));
-    }
-    if (args.minFollowers) {
-      q = q.filter(q => q.gte(q.field("followerCount"), args.minFollowers!));
-    }
-    if (args.maxFollowers) {
-      q = q.filter(q => q.lte(q.field("followerCount"), args.maxFollowers!));
-    }
-
-    let influencers = await q.collect();
-
-    // Apply engagement rate filtering after collecting results
-    if (args.minEngagement || args.maxEngagement) {
-      influencers = influencers.filter(influencer => {
-        const engagementRate = influencer.engagementRate || 0;
-        if (args.minEngagement && engagementRate < args.minEngagement) return false;
-        if (args.maxEngagement && engagementRate > args.maxEngagement) return false;
-        return true;
-      });
-    }
-
-    // Apply search filter after collecting results
-    if (args.search) {
-      const searchLower = args.search.toLowerCase();
-      influencers = influencers.filter(influencer => 
-        influencer.name?.toLowerCase().includes(searchLower) ||
-        influencer.handle?.toLowerCase().includes(searchLower)
+      influencersQuery = influencersQuery.filter(q => 
+        q.eq(q.field("niche"), args.niche)
       );
     }
 
-    // Sorting
+    if (args.location) {
+      influencersQuery = influencersQuery.filter(q => 
+        q.eq(q.field("location"), args.location)
+      );
+    }
+
+    if (args.minFollowers !== undefined) {
+      influencersQuery = influencersQuery.filter(q => 
+        q.gte(q.field("followerCount"), args.minFollowers!)
+      );
+    }
+
+    if (args.maxFollowers !== undefined) {
+      influencersQuery = influencersQuery.filter(q => 
+        q.lte(q.field("followerCount"), args.maxFollowers!)
+      );
+    }
+
+    // Get all influencers
+    const influencers = await influencersQuery.collect();
+
+    // Apply search filter in memory
+    let filteredInfluencers = influencers;
+    if (args.search) {
+      const searchLower = args.search.toLowerCase();
+      filteredInfluencers = filteredInfluencers.filter(influencer => 
+        influencer.name?.toLowerCase().includes(searchLower) ||
+        influencer.bio?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply engagement rate filter in memory since it's a computed value
+    filteredInfluencers = filteredInfluencers.filter(influencer => {
+      const engagementRate = influencer.engagementRate || 0;
+      const matchesMinEngagement = !args.minEngagement || engagementRate >= args.minEngagement;
+      const matchesMaxEngagement = !args.maxEngagement || engagementRate <= args.maxEngagement;
+      return matchesMinEngagement && matchesMaxEngagement;
+    });
+
+    // Sort results if sortBy is provided
     if (args.sortBy) {
-      influencers = influencers.sort((a, b) => {
-        const actualSortField = args.sortBy === "followers" ? "followerCount" : args.sortBy;
-
-        // Cast 'a' and 'b' to a type that allows string indexing for dynamic property access
-        const aIndexed = a as Record<string, unknown>;
-        const bIndexed = b as Record<string, unknown>;
-
-        const aValRaw = aIndexed[actualSortField!];
-        const bValRaw = bIndexed[actualSortField!];
-
-        // Convert values to numbers for comparison, handling undefined and string numbers
-        const aVal = typeof aValRaw === 'string' ? parseFloat(aValRaw) : (aValRaw as number || 0);
-        const bVal = typeof bValRaw === 'string' ? parseFloat(bValRaw) : (bValRaw as number || 0);
-
-        if (args.sortOrder === "asc") return aVal - bVal;
-        return bVal - aVal;
+      filteredInfluencers.sort((a, b) => {
+        const aValue = a[args.sortBy as keyof typeof a] || 0;
+        const bValue = b[args.sortBy as keyof typeof b] || 0;
+        const multiplier = args.sortOrder === "desc" ? -1 : 1;
+        return (Number(aValue) - Number(bValue)) * multiplier;
       });
     }
 
-    return influencers;
-  }
+    return filteredInfluencers;
+  },
 });
 
 

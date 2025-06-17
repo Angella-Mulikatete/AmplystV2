@@ -240,6 +240,23 @@ const SocialMediaLinked = ({ data, onUpdate }: SocialMediaLinkedProps) => {
                 <p><strong>following:</strong> {profileData.following || "N/A"}</p>
               </div>
             )}
+            {platform.id === "instagram" && instaProfileData && (
+              <div className="mt-2 p-2 border rounded bg-gray-50 text-sm">
+                <p><strong>Full Name:</strong> {instaProfileData.fullName || "N/A"}</p>
+                <p><strong>Username:</strong> {instaProfileData.username || "N/A"}</p>
+                <p><strong>Followers:</strong> {instaProfileData.followersCount ?? "N/A"}</p>
+                <p><strong>Following:</strong> {instaProfileData.followsCount ?? "N/A"}</p>
+                <p><strong>Bio:</strong> {instaProfileData.biography || "N/A"}</p>
+                <p><strong>Private:</strong> {instaProfileData.private ? "Yes" : "No"}</p>
+                <p><strong>Verified:</strong> {instaProfileData.verified ? "Yes" : "No"}</p>
+                {/* <img
+                  src={instaProfileData.profilePicUrlHD || instaProfileData.profilePicUrl}
+                  alt="Profile"
+                  className="mt-2 rounded-full w-16 h-16 object-cover"
+                /> */}
+              </div>
+            )}
+
             {error[platform.id] && (
               <div className="text-red-600 text-sm mt-1">{error[platform.id]}</div>
             )}

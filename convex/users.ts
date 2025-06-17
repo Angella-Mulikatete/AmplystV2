@@ -29,74 +29,109 @@ export const insertProfile = mutation({
       v.literal("agency"),
     ),
     name: v.string(),
-    bio: v.optional(v.string()),
+    bio: v.string(),
     profilePictureUrl: v.optional(v.string()),
-    niche: v.optional(v.string()),
-    location: v.optional(v.string()),
+    niche: v.string(),
+    location: v.string(),
     followerCount: v.optional(v.number()),
-    socialAccounts: v.optional(
+    socialAccounts: v.object({
+      instagram: v.string(),
+      tiktok: v.string(),
+      youtube: v.string(),
+      twitter: v.string(),
+    }),
+    portfolio: v.array(
       v.object({
-        instagram: v.string(),
-        tiktok: v.string(),
-        youtube: v.string(),
-        twitter: v.string(),
+        id: v.number(),
+        type: v.string(),
+        title: v.string(),
+        description: v.string(),
+        url: v.string(),
+        metrics: v.object({
+          followers: v.string(),
+          likes: v.string(),
+          comments: v.string(),
+          shares: v.string(),
+        }),
       })
     ),
-    portfolio: v.optional(v.array(v.any())),
   },
   handler: async (ctx, args) => {
-    try {
+    const identity = await ctx.auth.getUserIdentity();
+    console.log("User identity:", identity);
 
-      // 1. Get Clerk identity
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) throw new Error("User not authenticated");
-      console.log("User identity:", identity);
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
 
-      // 2. Find user by email
-      let user = await ctx.db
-        .query("users")
-        .withIndex("by_email", (q) => q.eq("email", identity.email!))
-        .unique();
+    // Check if user already exists
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
 
-      // 3. If user doesn't exist, create them
-      if (!user) {
-        const newUserId = await ctx.db.insert("users", {
-          tokenIdentifier: identity.tokenIdentifier,
-          email: identity.email!,
-          role: args.role,
-        });
-        user = await ctx.db.get(newUserId);
-        if (!user) {
-          throw new Error("Failed to retrieve newly created user");
-        }
-      }
+    console.log("Existing profile:", existingUser);
 
-      // 4. Query profile by userId (_id)
+    if (existingUser) {
+      // Update existing user with basic fields
+      await ctx.db.patch(existingUser._id, {
+        role: args.role,
+        email: identity.email!,
+      });
+
+      // Update or create profile
       const existingProfile = await ctx.db
         .query("profiles")
-        .withIndex("by_userId", (q) => q.eq("userId", user._id))
+        .withIndex("by_userId", (q) => q.eq("userId", existingUser._id))
         .unique();
 
-      console.log("Existing profile:", existingProfile);
-
       if (existingProfile) {
-        await ctx.db.patch(existingProfile._id, {
-          ...args,
-          userId: user._id,
+        return await ctx.db.patch(existingProfile._id, {
+          role: args.role,
+          name: args.name,
+          bio: args.bio,
+          profilePictureUrl: args.profilePictureUrl,
+          niche: args.niche,
+          location: args.location,
+          followerCount: args.followerCount,
+          socialAccounts: args.socialAccounts,
+          portfolio: args.portfolio,
         });
-        return existingProfile._id;
       } else {
-        console.log("Creating new profile for user:", user._id);
-        const profileId = await ctx.db.insert("profiles", {
-          userId: user._id,
-          ...args,
+        return await ctx.db.insert("profiles", {
+          userId: existingUser._id,
+          role: args.role,
+          name: args.name,
+          bio: args.bio,
+          profilePictureUrl: args.profilePictureUrl,
+          niche: args.niche,
+          location: args.location,
+          followerCount: args.followerCount,
+          socialAccounts: args.socialAccounts,
+          portfolio: args.portfolio,
         });
-        console.log("New profile created with ID:", profileId);
-        return profileId;
       }
-    } catch (error) {
-      console.error("Error inserting profile:", error);
-      throw error; 
+    } else {
+      // Create new user with basic fields
+      const userId = await ctx.db.insert("users", {
+        tokenIdentifier: identity.tokenIdentifier,
+        email: identity.email!,
+        role: args.role,
+      });
+
+      // Create new profile
+      return await ctx.db.insert("profiles", {
+        userId,
+        role: args.role,
+        name: args.name,
+        bio: args.bio,
+        profilePictureUrl: args.profilePictureUrl,
+        niche: args.niche,
+        location: args.location,
+        followerCount: args.followerCount,
+        socialAccounts: args.socialAccounts,
+        portfolio: args.portfolio,
+      });
     }
   },
 });

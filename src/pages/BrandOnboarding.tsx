@@ -122,7 +122,7 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
         totalBudget: 0,
         influencerCollaborations: []
       });
-      navigate('/dashboard');
+      navigate('/brand/dashboard');
     } catch (err) {
       console.error("Failed to save brand profile:", err);
     }
