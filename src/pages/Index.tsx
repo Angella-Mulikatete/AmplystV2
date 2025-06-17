@@ -321,7 +321,7 @@ const Index = () => {
       <footer className="bg-primary-800 text-white py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <p className="text-primary-200">
-            © 2024 Amplyst. Revolutionizing influencer marketing with AI.
+            © 2025 Amplyst. Revolutionizing influencer marketing with AI.
           </p>
         </div>
       </footer>
