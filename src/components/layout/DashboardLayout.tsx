@@ -106,7 +106,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co" }
 
       {/* Sidebar */}
       <aside className={`
-        fixed md:static top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out
+        fixed md:static min-h-screen top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out
         ${isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
       `}>
         {/* Mobile Close Button */}
