@@ -35,7 +35,7 @@ const Index = () => {
           </div> */}
           <div className="flex items-center space-x-2">
             <img 
-              src="/src/assets/logo.png"  // or logo.png
+              src="/assets/logo.png"  // or logo.png
               alt="Amplyst Logo"
               className="w-30 h-8 object-contain"  // maintains aspect ratio
             />
@@ -73,7 +73,7 @@ const Index = () => {
           {/* Left: Hero Image */}
           <div className="w-full lg:w-1/2 flex justify-center">
             <img
-               src="/src/assets/heroImage.jpeg" 
+               src="/assets/heroImage.jpeg" 
               alt="Amplyst dashboard preview"
               className="w-full max-w-md object-contain scale-150"
               loading="lazy"
