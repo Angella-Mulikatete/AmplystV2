@@ -558,7 +558,11 @@ const InfluencerDashboard = () => {
 
   return (
     <SignedIn>
-      <DashboardLayout userRole="influencer" userName={profile.name} userAvatar={profile.profilePictureUrl}>
+      <DashboardLayout 
+      userRole="influencer" 
+      userName={profile.name} 
+      // userAvatar={profile.profilePictureUrl}
+      >
         <div className="space-y-6">
           {/* Welcome Header */}
           {/* <motion.div className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg p-6 text-white">
