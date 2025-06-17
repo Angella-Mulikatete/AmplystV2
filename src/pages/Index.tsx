@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,95 +68,47 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <Badge className="mb-6 bg-[#3A7CA5]/10 text-[#3A7CA5] hover:bg-[#3A7CA5]/10">
-            🚀 Smart Influencer Collaboration Platform
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Connect Small Brands with 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3A7CA5] to-[#88B04B]">
-              {" "}Nano & Micro Influencers
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Amplyst empowers nano and micro-influencers to monetize their content while helping small brands 
-            and startups discover authentic partnerships that drive real results.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link to="/register?role=influencer">
-              <Button size="lg" className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90 px-8">
-                Join as Creator
-              </Button>
-            </Link>
-            <Link to="/register?role=brand">
-              <Button size="lg" variant="outline" className="border-[#3A7CA5] text-[#3A7CA5] hover:bg-[#3A7CA5]/5 px-8">
-                Find Influencers
-              </Button>
-            </Link>
+      <section>
+        <div className="container bg-white mx-auto py-10 flex flex-col-reverse lg:flex-row items-center gap-12">
+          {/* Left: Hero Image */}
+          <div className="w-full lg:w-1/2 flex justify-center">
+            <img
+               src="/src/assets/heroImage.jpeg" 
+              alt="Amplyst dashboard preview"
+              className="w-full max-w-md object-contain scale-150"
+              loading="lazy"
+            />
           </div>
-          
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-[#3A7CA5]" />
-                  {stats.influencerCount.toLocaleString()} Influencers
-                </CardTitle>
-                <CardDescription>Growing network of creators</CardDescription>
-              </CardHeader>
-              {/* <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">45% increase in the last quarter</p>
-              </CardContent> */}
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-[#E19629]" />
-                  {stats.campaignsCount.toLocaleString()} Campaigns
-                </CardTitle>
-                <CardDescription>Opportunities for collaboration</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">30% more campaigns this month</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-[#3A7CA5]" />
-                  $5M+ Paid Out
-                  {/* ${stats.totalPaid.toLocaleString()}+ Paid Out */}
-                </CardTitle>
-                <CardDescription>Earnings for our creators</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">Up 20% from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-[#88B04B]" />
-                     {brandCount !== undefined ? brandCount : "..."} Brands
-                </CardTitle>
-                <CardDescription>Growing network of Brands on Amplyst</CardDescription>
-              </CardHeader>
-              {/* <CardContent>
-                <TrendingUp className="h-8 w-8 text-[#88B04B] mb-2" />
-                <p className="text-sm text-gray-600">Consistent positive feedback</p>
-              </CardContent> */}
-            </Card>
-
-      
-
+          {/* Right: Text Content */}
+          <div className="w-full lg:w-1/2 text-center lg:text-left">
+            <Badge className="mb-6 bg-[#3A7CA5]/10 text-[#3A7CA5] hover:bg-[#3A7CA5]/10">
+              🚀 Smart Influencer Collaboration Platform
+            </Badge>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Connect Small Brands with 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3A7CA5] to-[#88B04B]">
+                {" "}Nano & Micro Influencers
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto lg:mx-0 leading-7">
+              Amplyst connects nano and micro-influencers with small brands for authentic partnerships that drive results.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-12">
+              <Link to="/register?role=influencer">
+                <Button size="lg" className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90 px-8">
+                  Join as Creator
+                </Button>
+              </Link>
+              <Link to="/register?role=brand">
+                <Button size="lg" variant="outline" className="border-[#3A7CA5] text-[#3A7CA5] hover:bg-[#3A7CA5]/5 px-8">
+                  Find Influencers
+                </Button>
+              </Link>
+            </div>
+            {/* Stats Grid (optional: keep here or below image on mobile) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+              {/* ...your stats cards here... */}
+            </div>
           </div>
         </div>
       </section>
