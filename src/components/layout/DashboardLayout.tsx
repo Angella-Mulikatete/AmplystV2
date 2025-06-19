@@ -19,14 +19,6 @@ import {
   BarChart3,
   MessageSquare,
   Briefcase,
-  Zap,
-  TrendingUp,
-  DollarSign,
-  Eye,
-  Calendar,
-  Star,
-  CheckCircle,
-  XCircle,
   Menu,
   X
 } from "lucide-react";
@@ -59,17 +51,18 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co" }
       { label: "Messages", href: `/${userRole}/messages`, icon: MessageSquare },
       { label: "Settings", href: `/${userRole}/settings`, icon: Settings },
     ];
-
+// /brand/applications
     const brandItems = [
       ...commonItems,
-      { label: "Discover Influencers", href: "/brand/discover", icon: Users },
+      { label: "Discover Influencers", href: "/influencer/discover", icon: Users },
       { label: "Campaigns", href: "/brand/campaigns", icon: Target },
+       { label: "Influencer Applications", href: "/brand/applications", icon: Target },
       { label: "Analytics", href: "/brand/analytics", icon: BarChart3 },
     ];
 
     const influencerItems = [
       ...commonItems,
-      { label: "Discover Brands", href: "/influencer/discover", icon: Target },
+      { label: "Discover Brands", href: "/brand/discover", icon: Target },
       { label: "My Campaigns", href: "/influencer/campaigns", icon: Briefcase },
       { label: "Analytics", href: "/influencer/analytics", icon: BarChart3 },
     ];

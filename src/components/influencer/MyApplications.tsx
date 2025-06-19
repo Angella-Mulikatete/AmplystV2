@@ -87,7 +87,7 @@ const MyApplications = ({ campaigns, profile }: MyApplicationsProps) => {
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
-                {campaign.status === "pending" && (
+                {campaign.status === "draft" && (
                   <Button size="sm" variant="outline" className="border-red-500 text-red-500 hover:bg-red-50">
                     <XCircle className="h-4 w-4 mr-2" />
                     Withdraw Application

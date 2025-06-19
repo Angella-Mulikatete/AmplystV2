@@ -15,8 +15,16 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import InfluencerDashboard from "./pages/InfluencerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import BrandOnboarding from "./pages/BrandOnboarding";
+import BrandDiscovery from "./components/influencer/BrandDiscovery";
+import BrandDiscoveryPage from "./pages/BrandDiscoveryPage";
+import InfluencerCampaigns from "./pages/InfluencerCampaigns";
+import InfluencerApplication from "./pages/InfluencerApplications";
+
+
 
 const queryClient = new QueryClient();
+
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,9 +41,12 @@ const App = () => (
           {/* <Route path="/onboarding/brand" element={<CampaignCreation />} /> */}
           <Route path="/brand/dashboard" element={<BrandDashboard />} />
           <Route path="/brand/campaigns/create" element={<CampaignCreation />} />
-          <Route path="/brand/discover" element={<InfluencerDiscovery />} />
+          <Route path="/influencer/discover" element={<InfluencerDiscovery />} />
           <Route path="/influencer/dashboard" element={<InfluencerDashboard />} />
+          <Route path="/brand/discover" element={<BrandDiscoveryPage />} />
+          <Route path="/brand/applications" element={<InfluencerApplication />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/influencer/campaigns" element={<InfluencerCampaigns />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

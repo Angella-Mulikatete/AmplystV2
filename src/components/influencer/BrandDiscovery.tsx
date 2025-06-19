@@ -37,7 +37,7 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
       total: brandCampaigns.length,
       active: brandCampaigns.filter(c => c.status === 'active').length,
       completed: brandCampaigns.filter(c => c.status === 'completed').length,
-      upcoming: brandCampaigns.filter(c => c.status === 'upcoming').length
+      upcoming: brandCampaigns.filter(c => c.status === 'draft').length
     };
   };
 
