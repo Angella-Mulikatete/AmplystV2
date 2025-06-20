@@ -7,6 +7,7 @@ import { Doc, Id } from "../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ApplicationModal from "../ApplicationModal";
 
 interface BrandDiscoveryProps {
   brands: Doc<"brands">[];
@@ -17,6 +18,8 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
   const [selectedBrand, setSelectedBrand] = useState<Doc<"brands"> | null>(null);
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [brandCampaigns, setBrandCampaigns] = useState<Doc<"campaigns">[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<Id<"campaigns"> | null>(null);
 
   // Get all campaigns
   const allCampaigns = useQuery(api.campaign.allCampaigns, {});
@@ -39,6 +42,11 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
       completed: brandCampaigns.filter(c => c.status === 'completed').length,
       upcoming: brandCampaigns.filter(c => c.status === 'draft').length
     };
+  };
+
+  const handleApplyNow = (campaignId: Id<"campaigns">) => {
+    setSelectedCampaignId(campaignId);
+    setShowModal(true);
   };
 
   if (!brands || !campaigns) {
@@ -120,6 +128,9 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
           <DialogHeader>
             <DialogTitle>{selectedBrand?.companyName}'s Campaigns</DialogTitle>
           </DialogHeader>
+            <p id="brand-campaigns-description" className="sr-only">
+              List of all campaigns created by this brand.
+            </p>
           <div className="space-y-4">
             {brandCampaigns.length === 0 ? (
               <Card>
@@ -165,9 +176,7 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
 
                     <Button 
                       className="w-full bg-[#3A7CA5] hover:bg-[#3A7CA5]/90"
-                      onClick={() => {
-                        // Handle apply to campaign
-                      }}
+                      onClick={() => handleApplyNow(campaign._id)}
                     >
                       Apply Now
                     </Button>
@@ -175,6 +184,17 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
                 </Card>
               ))
             )}
+
+            {showModal && selectedCampaignId && (
+              <ApplicationModal 
+                campaignId={selectedCampaignId}
+                onClose={() => {
+                  setShowModal(false);
+                  setSelectedCampaignId(null);
+                }}
+              />
+            )}
+
           </div>
         </DialogContent>
       </Dialog>

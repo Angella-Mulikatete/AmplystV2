@@ -306,6 +306,9 @@ const InfluencerDashboard = () => {
     </Dialog>
   );
 
+  // Calculate approved applications count
+  const approvedApplicationsCount = applications? applications.filter(app => app.status === 'approved').length: 0;
+
   if (!profile || !allCampaigns || !activeCampaigns || !applications || !allBrands) {
     return (
       <DashboardLayout userRole="influencer">
@@ -383,9 +386,10 @@ const InfluencerDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Active Campaigns</p>
+                <p className="text-sm text-gray-600">Approved Applications</p>
                 <p className="text-2xl font-bold text-primary-800">
-                  {activeCampaigns.filter(campaign => campaign.status === 'active').length}
+                  {/* {activeCampaigns.filter(campaign => campaign.status === 'active').length} */}
+                   {approvedApplicationsCount}
                 </p>
               </div>
               <Target className="w-8 h-8 text-blue-500" />
@@ -564,24 +568,6 @@ const InfluencerDashboard = () => {
       // userAvatar={profile.profilePictureUrl}
       >
         <div className="space-y-6">
-          {/* Welcome Header */}
-          {/* <motion.div className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold mb-2">Welcome back, {profile.name}! 👋</h1>
-                <p className="text-white/90">
-                  {activeCampaigns.length > 0 
-                    ? `You have ${activeCampaigns.length} active campaigns`
-                    : "Discover new campaigns to join"}
-                </p>
-              </div>
-              <Button variant="secondary" className="bg-white text-primary-600 hover:bg-gray-100">
-                <Edit className="w-4 h-4 mr-2" />
-                View Profile
-              </Button>
-            </div>
-          </motion.div> */}
-
           {/* Navigation Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-4">
