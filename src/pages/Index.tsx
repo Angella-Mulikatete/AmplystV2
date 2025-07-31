@@ -29,27 +29,24 @@ const Index = () => {
   const testimonials = [
     {
       id: 1,
-      quote: "Tunga Nutrition has transformed our farm completely. Their expert advice and quality feeds have increased our egg production by 40%. The support team is always available when we need help.",
-      name: "Sarah Namukasa",
-      role: "Poultry Farmer",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      videoTitle: "Watch Sarah Namukasa's Story"
+      quote: "Amplyst connected us with the perfect micro-influencers for our sustainable fashion line. The results exceeded our expectations with a 300% increase in sales within just 3 months.",
+      name: "Claudia Vine",
+      role: "Senior Manager, Social and Influencer Strategy",
+      imageSrc: "/src/assets/person.jpg"
     },
     {
       id: 2,
-      quote: "Amplyst connected us with the perfect micro-influencers for our sustainable fashion line. The results exceeded our expectations with a 300% increase in sales within just 3 months.",
-      name: "EcoWear Team",
-      role: "Sustainable Fashion Startup",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      videoTitle: "Watch EcoWear's Success Story"
+      quote: "As a nano-influencer with 5K followers, I finally found brands that value authentic engagement over follower count. I've earned $2,000 in my first month on the platform!",
+      name: "Sarah Johnson",
+      role: "Nano-Influencer",
+      imageSrc: "/src/assets/person.jpg"
     },
     {
       id: 3,
-      quote: "As a nano-influencer with 5K followers, I finally found brands that value authentic engagement over follower count. I've earned $2,000 in my first month on the platform!",
-      name: "InfluencerJane",
-      role: "Nano-Influencer",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      videoTitle: "Watch InfluencerJane's Journey"
+      quote: "The platform's AI-powered matching system helped us find creators who truly align with our brand values. Our campaign ROI increased by 250% compared to traditional marketing.",
+      name: "Michael Chen",
+      role: "Marketing Director",
+      imageSrc: "/src/assets/person.jpg"
     }
   ];
 
@@ -61,37 +58,7 @@ const Index = () => {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  // Scroll animation state
-  const [visibleBlocks, setVisibleBlocks] = useState([0]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const contentElement = document.querySelector('#how-it-works-content');
-      
-      if (!contentElement) return;
-      
-      const rect = contentElement.getBoundingClientRect();
-      const sectionTop = scrollPosition + rect.top;
-      
-      // Calculate which block should be visible based on scroll position
-      const blockHeight = 400; // Increased height for better spacing between blocks
-      const scrollProgress = scrollPosition - sectionTop + windowHeight * 0.2;
-      const blockIndex = Math.floor(scrollProgress / blockHeight);
-      
-      // Show only one block at a time
-      const newVisibleBlocks = [];
-      if (blockIndex >= 0 && blockIndex <= 2) {
-        newVisibleBlocks.push(blockIndex);
-      }
-      
-      setVisibleBlocks(newVisibleBlocks);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#3A7CA5]/5 to-[#88B04B]/5">
@@ -190,23 +157,7 @@ const Index = () => {
               </Button>
             </div>
             
-            {/* Trustpilot Rating */}
-            <div className="flex items-center justify-center space-x-2 mb-8 relative z-10">
-              <div className="flex items-center space-x-1">
-                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="text-green-600 font-semibold">Trustpilot</span>
-              </div>
-              <div className="flex space-x-1">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <span className="text-gray-600 font-medium">10000+ 5 Stars</span>
-            </div>
+
           </div>
         </div>
         
@@ -260,57 +211,57 @@ const Index = () => {
             </p>
           </div>
           
-          {/* Bottom Section - Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Left Column - Fixed Video */}
-            <div className="sticky top-20 lg:top-32">
-              <div className="relative">
-                <video 
-                  className="w-full h-auto rounded-lg shadow-lg bg-transparent"
-                  autoPlay 
-                  muted 
-                  loop 
-                  playsInline
-                >
-                  <source src="/src/assets/how-it-works.webm" type="video/webm" />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            </div>
-            
-            {/* Right Column - Scrollable Text Content */}
-            <div className="space-y-16" id="how-it-works-content">
-              {/* Content Block 1 */}
-              <div className={`scroll-trigger min-h-[200px] ${visibleBlocks.includes(0) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} transition-all duration-1000 ease-out`}>
-                <h3 className="text-2xl font-bold text-purple-600 mb-4">
-                  The Social Singularity is Here
-                </h3>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Social platforms have overtaken TV in audience size—flipping the marketing landscape forever.
-                </p>
-              </div>
-              
-              {/* Content Block 2 */}
-              <div className={`scroll-trigger min-h-[200px] ${visibleBlocks.includes(1) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} transition-all duration-1000 ease-out`}>
-                <h3 className="text-2xl font-bold text-purple-600 mb-4">
-                  Creator Economy Revolution
-                </h3>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  The creator economy is now worth over $100 billion, with creators becoming the new media companies and distribution channels.
-                </p>
-              </div>
-              
-              {/* Content Block 3 */}
-              <div className={`scroll-trigger min-h-[200px] ${visibleBlocks.includes(2) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} transition-all duration-1000 ease-out`}>
-                <h3 className="text-2xl font-bold text-purple-600 mb-4">
-                  Authentic Connections Drive Results
-                </h3>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  Consumers trust creators more than traditional advertising. Authentic partnerships deliver 3x higher engagement rates.
-                </p>
-              </div>
-            </div>
-          </div>
+                     {/* Offset Layout - Video Left, Content Right */}
+           <div className="relative flex items-start">
+             {/* Video - Sticky on Left */}
+             <div className="sticky top-20 w-1/2 pr-8">
+               <div className="relative">
+                 <video 
+                   className="w-full h-auto rounded-lg shadow-lg bg-transparent"
+                   autoPlay 
+                   muted 
+                   loop 
+                   playsInline
+                 >
+                   <source src="/src/assets/how-it-works.webm" type="video/webm" />
+                   Your browser does not support the video tag.
+                 </video>
+               </div>
+             </div>
+             
+             {/* Content Blocks - Scrollable on Right */}
+             <div className="w-1/2 pl-8 space-y-16" id="how-it-works-content">
+               {/* Content Block 1 */}
+               <div className="min-h-[150px]">
+                 <h3 className="text-2xl font-bold text-purple-600 mb-4">
+                   The Social Singularity is Here
+                 </h3>
+                 <p className="text-lg text-gray-700 leading-relaxed">
+                   Social platforms have overtaken TV in audience size—flipping the marketing landscape forever.
+                 </p>
+               </div>
+               
+               {/* Content Block 2 */}
+               <div className="min-h-[150px]">
+                 <h3 className="text-2xl font-bold text-purple-600 mb-4">
+                   Creator Economy Revolution
+                 </h3>
+                 <p className="text-lg text-gray-700 leading-relaxed">
+                   The creator economy is now worth over $100 billion, with creators becoming the new media companies and distribution channels.
+                 </p>
+               </div>
+               
+               {/* Content Block 3 */}
+               <div className="min-h-[150px]">
+                 <h3 className="text-2xl font-bold text-purple-600 mb-4">
+                   Authentic Connections Drive Results
+                 </h3>
+                 <p className="text-lg text-gray-700 leading-relaxed">
+                   Consumers trust creators more than traditional advertising. Authentic partnerships deliver 3x higher engagement rates.
+                 </p>
+               </div>
+             </div>
+           </div>
         </div>
       </section>
 
@@ -391,89 +342,65 @@ const Index = () => {
       </section>
 
       {/* Success Stories Section */}
-      <section id="success-stories" className="py-16 px-4 bg-gray-50">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Success Stories
-          </h2>
+      <section id="success-stories" className="py-16 px-4">
+        <div className="container mx-auto">
+          <div className="text-left mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Success Stories
+            </h2>
+            <p className="text-lg text-gray-600">
+              Real stories from brands and creators who found success with Amplyst
+            </p>
+          </div>
           
           {/* Success Story Carousel */}
           <div className="max-w-6xl mx-auto relative">
-            {/* Navigation Buttons - Outside the card */}
-            <button
-              onClick={prevTestimonial}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-12 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 z-10"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft className="h-6 w-6 text-gray-600" />
-            </button>
-            
-            <button
-              onClick={nextTestimonial}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-12 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 z-10"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight className="h-6 w-6 text-gray-600" />
-            </button>
-            
-            {/* Carousel Container */}
-            <div className="relative">
-              <Card className="p-8 hover:shadow-lg transition-shadow bg-white">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                  {/* Left Side - Testimonial */}
+            {/* Testimonial Card with Split Background */}
+            <div className="relative overflow-hidden shadow-lg">
+              {/* Split Background */}
+              <div className="absolute inset-0">
+                <div className="w-1/3 h-full bg-gray-100"></div>
+                <div className="absolute right-0 top-0 w-2/3 h-full bg-blue-100"></div>
+              </div>
+              
+              {/* Content */}
+              <div className="relative grid grid-cols-1 lg:grid-cols-3 min-h-[300px]">
+                {/* Left Side - Full Image */}
+                <div className="bg-gray-100 flex items-center justify-center p-0">
+                  <img 
+                    src={testimonials[currentTestimonial].imageSrc}
+                    alt={testimonials[currentTestimonial].name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                {/* Right Side - Testimonial Text */}
+                <div className="bg-blue-100 p-8 flex flex-col justify-center lg:col-span-2">
                   <div className="text-left">
                     {/* Quote */}
                     <div className="mb-6">
-                      <div className="text-6xl text-gray-300 font-serif mb-2">"</div>
-                      <p className="text-lg text-gray-700 italic leading-relaxed">
-                        {testimonials[currentTestimonial].quote}
+                      <p className="text-xl text-blue-900 leading-relaxed font-medium">
+                        "{testimonials[currentTestimonial].quote}"
                       </p>
                     </div>
                     
                     {/* Attribution */}
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                        {/* Removed initials - empty avatar */}
+                    <div className="mb-4">
+                      <div className="font-semibold text-blue-900 text-lg">
+                        {testimonials[currentTestimonial].name}
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">{testimonials[currentTestimonial].name}</div>
-                        <div className="text-sm text-[#88B04B]">{testimonials[currentTestimonial].role}</div>
+                      <div className="text-blue-700 text-sm">
+                        {testimonials[currentTestimonial].role}
                       </div>
-                    </div>
-                  </div>
-                  
-                  {/* Right Side - YouTube Video */}
-                  <div className="relative">
-                    <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
-                      <iframe
-                        src={testimonials[currentTestimonial].videoUrl}
-                        title={testimonials[currentTestimonial].videoTitle}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             </div>
             
-            {/* Dots Indicator */}
-            <div className="flex justify-center mt-6 space-x-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                    index === currentTestimonial 
-                      ? 'bg-[#88B04B] scale-125' 
-                      : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
-            </div>
+
+            
+
           </div>
         </div>
       </section>
@@ -536,6 +463,7 @@ const Index = () => {
 };
 
 export default Index;
+
 
 
 
