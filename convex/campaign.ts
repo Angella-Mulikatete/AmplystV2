@@ -114,7 +114,15 @@ import { api } from "./_generated/api";
     }
   });
 
-  
+
+  export const getCampaignById = query({
+    args: { campaignId: v.id("campaigns") },
+    handler: async (ctx, args): Promise<Doc<"campaigns"> | null> => {
+      return await ctx.db.get(args.campaignId);
+    },
+  });
+
+
   export const campaignsForInfluencer = query({
     handler: async (ctx) => {
       const userId = await getAuthUserId(ctx);

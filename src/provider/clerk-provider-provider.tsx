@@ -6,12 +6,6 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useAuth, useUser } from "@clerk/clerk-react"; // <-- use clerk-react, NOT nextjs
 import { api } from "../../convex/_generated/api";
 
-//const convexUrl = import.meta.env.VITE_CONVEX_URL;
-
-
-// if (!convexUrl) {
-//   throw new Error("Missing VITE_CONVEX_URL in your .env file");
-// }
 
 const convex = new ConvexReactClient("https://neat-dinosaur-170.convex.cloud");
 

@@ -10,17 +10,14 @@ export interface TikTokProfileData {
   heart?: number;
   verified?: boolean;
   profilePictureUrl?: string;
-  // Add other fields you need from the TikTok profile data
 }
 
 export async function runTikTokActor(username: string): Promise<TikTokProfileData[]> {
-  // Prepare input for the Actor
   const input = {
     searchQueries: [username],
     maxProfilesPerQuery: 1,
   };
 
-  // Start the actor run
   const runResponse = await axios.post(
     `https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${APIFY_TOKEN}`,
     input
@@ -28,7 +25,6 @@ export async function runTikTokActor(username: string): Promise<TikTokProfileDat
 
   const runId = runResponse.data.data.id;
 
-  // Poll for run completion (simplified)
   let runStatus = "";
   let datasetId = "";
 
@@ -47,7 +43,6 @@ export async function runTikTokActor(username: string): Promise<TikTokProfileDat
     throw new Error("Actor run failed");
   }
 
-  // Fetch results from dataset
   const datasetResponse = await axios.get(
     `https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}`
   );

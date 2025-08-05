@@ -1,6 +1,6 @@
 import React from 'react'
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
-//import logo from '../assets/logo.png'; // Adjust the path as necessary
+
 
 
 const Header = () => {
@@ -10,9 +10,9 @@ const Header = () => {
             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <img 
-                    src= "/images/logo"  // or logo.png
+                    src= "/images/logo" 
                     alt="Amplyst Logo"
-                    className="w-30 h-8 object-contain"  // maintains aspect ratio
+                    className="w-30 h-8 object-contain"  
                   />
                 </div>
                 <div className="hidden md:flex items-center space-x-8">

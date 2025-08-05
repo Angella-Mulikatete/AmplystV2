@@ -17,6 +17,7 @@ import type * as applications from "../applications.js";
 import type * as brands from "../brands.js";
 import type * as campaign from "../campaign.js";
 import type * as campaignExpiration from "../campaignExpiration.js";
+import type * as content from "../content.js";
 import type * as influencers from "../influencers.js";
 import type * as migrations from "../migrations.js";
 import type * as scheduled from "../scheduled.js";
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   brands: typeof brands;
   campaign: typeof campaign;
   campaignExpiration: typeof campaignExpiration;
+  content: typeof content;
   influencers: typeof influencers;
   migrations: typeof migrations;
   scheduled: typeof scheduled;

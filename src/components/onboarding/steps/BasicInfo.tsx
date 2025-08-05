@@ -135,7 +135,7 @@ const BasicInfo = ({ data, onUpdate }: BasicInfoProps) => {
         <div className="space-y-2">
           <Label htmlFor="followerCount">Follower Count</Label>
           <Select
-            value={data.followerCount} // Make it controlled
+            value={data.followerCount} 
             onValueChange={(value) => onUpdate({ followerCount: value })}
           >
             <SelectTrigger className="transition-all duration-200 focus:ring-2 focus:ring-primary">

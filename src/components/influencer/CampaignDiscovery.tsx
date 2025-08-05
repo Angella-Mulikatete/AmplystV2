@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +62,7 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
   const applications = useQuery(api.campaign.getTotalApplicationsForMyCampaigns);
 
   function CampaignListByNiche({ selectedNiche }) {
-    // Only call useQuery if a niche is selected
+
     const campaigns = selectedNiche ? useQuery(api.campaign.campaignsByNiche, { niche: selectedNiche }) : null;
   
     if (!selectedNiche) return null;
@@ -87,7 +88,7 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
   
   return (
     <div className="space-y-6">
-      {/* Filters */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -165,7 +166,7 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
         </CardContent>
       </Card>
 
-      {/* Campaign Results */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredCampaigns.map((campaign) => (
           <Card key={campaign._id} className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-[#3A7CA5]">

@@ -34,6 +34,6 @@ app.post('/api/ai-match', async (req, res) => {
   res.json({ influencerIds: ids });
 });
 
-app.listen(3001, () => {
+app.listen(3000, () => {
   console.log('AI Server running on port 3001');
 });

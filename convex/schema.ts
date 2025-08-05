@@ -5,7 +5,7 @@ import { v } from "convex/values";
 const emailStatus = v.union(
   v.literal("draft"),
   v.literal("scheduled"),
-  v.literal("sending"), // Optional: If sending can take time and needs tracking
+  v.literal("sending"), 
   v.literal("sent"),
   v.literal("failed")
 );
@@ -24,39 +24,9 @@ const applicationTables = {
       v.literal("agency")
     ),
   })
-  .index("by_token", ["tokenIdentifier"]) // Essential for auth lookup
+  .index("by_token", ["tokenIdentifier"]) 
   .index("by_email", ["email"]),  
-      
-  // profiles : defineTable({
-  //   userId: v.id("users"),
-  //   role: v.union(
-  //     v.literal("influencer"),
-  //     v.literal("brand"),
-  //     v.literal("agency")
-  //   ),
-  //   name: v.string(),
-  //   bio: v.optional(v.string()),
-  //   profilePictureUrl: v.optional(v.string()),
-  //   // Influencer-specific fields
-  //   niche: v.optional(v.string()),
-  //   location: v.optional(v.string()),
-  //   followerCount: v.optional(v.number()), // Changed to number
-  //   engagementRate: v.optional(v.number()), // Added engagementRate
-  //   socialAccounts: v.optional(
-  //     v.object({
-  //       instagram: v.string(),
-  //       tiktok: v.string(),
-  //       youtube: v.string(),
-  //       twitter: v.string(),
-  //     })
-  //   ),
-  //   portfolio: v.optional(v.array(v.any())),
-  //   primaryPlatform: v.optional(v.string()), // Add this line
-  //   // Brand/agency-specific fields
-  //   companyName: v.optional(v.string()),
-  //   website: v.optional(v.string()),
-  //   industry: v.optional(v.string()),
-  // }).index("by_userId", ["userId"]),
+
 
   profiles : defineTable({
     userId: v.id("users"),
@@ -107,9 +77,6 @@ const applicationTables = {
     totalEarnings: v.optional(v.number()),
   })
   .index("by_userId", ["userId"]),
-  
-  
-  
   
   campaigns : defineTable({
     creatorUserId: v.id("users"), // Brand or agency user
@@ -221,7 +188,17 @@ const applicationTables = {
     totalSpent: v.optional(v.number()),
     avgEngagement: v.optional(v.number()),
     engagementChange: v.optional(v.number())
-  }).index("by_userId", ["userId"])
+  }).index("by_userId", ["userId"]),
+
+  submittedContent: defineTable({
+    applicationId: v.id("applications"),
+    influencerId: v.id("users"),
+    contentUrl: v.string(),
+    caption: v.string(),
+    hashtags: v.string(),
+    postDate: v.optional(v.string()),
+    createdAt: v.string(), 
+  }),
 
 };
 

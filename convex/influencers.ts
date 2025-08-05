@@ -17,11 +17,8 @@ export const filterInfluencers = query({
   },
   handler: async (ctx, args) => {
     // Start with base query for profiles with role "influencer"
-    let influencersQuery = ctx.db
-      .query("profiles")
-      .filter(q => q.eq(q.field("role"), "influencer"));
+    let influencersQuery = ctx.db.query("profiles").filter(q => q.eq(q.field("role"), "influencer"));
 
-    // Apply filters if provided
     if (args.niche) {
       influencersQuery = influencersQuery.filter(q => 
         q.eq(q.field("niche"), args.niche)
@@ -46,7 +43,7 @@ export const filterInfluencers = query({
       );
     }
 
-    // Get all influencers
+    //  all influencers
     const influencers = await influencersQuery.collect();
 
     // Apply search filter in memory
@@ -67,7 +64,6 @@ export const filterInfluencers = query({
       return matchesMinEngagement && matchesMaxEngagement;
     });
 
-    // Sort results if sortBy is provided
     if (args.sortBy) {
       filteredInfluencers.sort((a, b) => {
         const aValue = a[args.sortBy as keyof typeof a] || 0;
@@ -83,7 +79,7 @@ export const filterInfluencers = query({
 
 
 export const listInfluencers = query({
-      args: {}, // Add filters later: niche, location, etc.
+      args: {}, 
       handler: async (ctx) => {
         const influencers = await ctx.db
           .query("profiles")
@@ -98,14 +94,11 @@ export const getInfluencerProfileByUserId = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    // Find the profile with the given userId and role === "influencer"
     const [profile] = await ctx.db
       .query("profiles")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("role"), "influencer"))
       .collect();
-
-    // Return the profile or null if not found
     return profile ?? null;
   },
 });

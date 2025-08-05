@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 // List all applications for a brand
 export const listApplications = query({
@@ -202,10 +203,37 @@ export const listInfluencerApplications = query({
       return [];
     }
 
-    // Then get applications for this user
     return await ctx.db
       .query("applications")
       .withIndex("by_influencer", q => q.eq("influencerId", user._id))
       .collect();
   },
 }); 
+
+export const listApprovedApplicationsForInfluencer = query(async (ctx) => {
+    const influencerId = await getAuthUserId(ctx);
+  if (!influencerId) return [];
+
+
+  const approvedApps = await ctx.db.query("applications")
+  .withIndex("by_influencer", (q) => q.eq("influencerId", influencerId))
+  .filter(q => q.eq(q.field("status"), "approved"))
+  .collect();
+
+  if (approvedApps.length === 0) return [];
+
+  const campaignIds = approvedApps.map(app => app.campaignId);
+
+  const campaigns = await ctx.db.query("campaigns")
+    .filter(q => q.or(...campaignIds.map(id => q.eq(q.field("_id"), id))))
+    .collect();
+
+  return approvedApps.map(app => {
+    const campaign = campaigns.find(c => c._id === (app.campaignId));
+    return {
+      applicationId: app._id,
+      campaign,
+      contentTypes: campaign?.contentTypes ?? [],
+    };
+  });
+});

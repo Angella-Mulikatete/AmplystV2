@@ -20,14 +20,11 @@ console.log("use auth initialized with URL:", useAuth);
 createRoot(document.getElementById("root")!)
 .render(
 
-        // <ConvexClientProvider>
-        //     <App />
-        // </ConvexClientProvider>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         <App />
       </ConvexProviderWithClerk>
-      {/* <ConvexProvider client={convex}> <App /></ConvexProvider> */}
+
       
     </ClerkProvider>
 );

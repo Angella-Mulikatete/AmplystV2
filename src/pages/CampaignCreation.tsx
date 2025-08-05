@@ -59,7 +59,6 @@ export default function CampaignCreation() {
   const navigate = useNavigate();
   const createCampaign = useMutation(api.campaign.createCampaign);
 
-  // All form data, including fields needed for backend
   const [campaignData, setCampaignData] = useState({
     name: "",
     description: "",
@@ -305,26 +304,6 @@ export default function CampaignCreation() {
           ))}
         </div>
       </div>
-      {/* <div>
-        <Label>Deliverables & Requirements</Label>
-        <Textarea
-          placeholder="Specify what you expect from influencers (e.g., 3 Instagram posts, 1 story per day, specific hashtags, etc.)"
-          className="mt-1"
-          rows={4}
-          value={campaignData.deliverables}
-          onChange={e => setCampaignData(prev => ({ ...prev, deliverables: e.target.value }))}
-        />
-      </div> */}
-      {/* <div>
-        <Label>Brand Guidelines</Label>
-        <Textarea
-          placeholder="Share any brand guidelines, key messages, or specific requirements..."
-          className="mt-1"
-          rows={3}
-          value={campaignData.brandGuidelines}
-          onChange={e => setCampaignData(prev => ({ ...prev, brandGuidelines: e.target.value }))}
-        />
-      </div> */}
     </motion.div>
   );
 
@@ -418,13 +397,11 @@ export default function CampaignCreation() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-primary-800">Create New Campaign</h1>
         <p className="text-gray-600 mt-1">Set up your influencer marketing campaign in just a few steps</p>
       </div>
 
-      {/* Progress Steps */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -456,7 +433,6 @@ export default function CampaignCreation() {
         </CardContent>
       </Card>
 
-      {/* Step Content */}
       <Card>
         <CardHeader>
           <CardTitle>{steps.find(s => s.number === currentStep)?.title}</CardTitle>
@@ -466,7 +442,6 @@ export default function CampaignCreation() {
         </CardContent>
       </Card>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <Button
           variant="outline"
@@ -498,233 +473,6 @@ export default function CampaignCreation() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useState } from "react";
-// import { Input } from "@/components/ui/input";
-// import { Textarea } from "@/components/ui/textarea";
-// import { Button } from "@/components/ui/button";
-// import { useMutation } from "convex/react";
-// import { api } from "../../convex/_generated/api";
-// import { useNavigate } from "react-router-dom";
-// import type { FunctionArgs } from "convex/server"; // Import FunctionArgs
-// import { toast } from "@/components/ui/use-toast";
-
-// // Define the type for the arguments expected by the Convex mutation
-// type CreateCampaignMutationArgs = FunctionArgs<typeof api.campaign.createCampaign>;
-
-// // Define the shape of the form data, which is slightly different from the mutation args
-// interface CampaignFormData {
-//   title: string;
-//   description: string;
-//   budget: string; // Stored as string in the form input
-//   targetAudience: string;
-//   contentTypes: string[];
-//   duration: string;
-//   startDate: string; // Corrected to startDate
-//   endDate: string;   // Corrected to endDate
-//   status: CreateCampaignMutationArgs["status"]; // Use the literal type from mutation args
-//   role: CreateCampaignMutationArgs["role"]; // Use the literal type from mutation args
-//   requiredInfluencers: string; // Add this field
-//   requirements: string;
-// }
-
-// const contentTypeOptions = [
-//   { value: "image", label: "Image Post" },
-//   { value: "video", label: "Video Content" },
-//   { value: "story", label: "Story/Reel" }
-// ];
-
-// export default function CampaignCreation() {
-//   const [step, setStep] = useState(1);
-//   const [form, setForm] = useState<CampaignFormData>({
-//     title: "",
-//     description: "",
-//     budget: "",
-//     targetAudience: "",
-//     contentTypes: [],
-//     duration: "",
-//     startDate: "", // Corrected to startDate
-//     endDate: "",   // Corrected to endDate
-//     status: "active", // This should now correctly be "active"
-//     role: "brand", // This should now correctly be "brand"
-//     requiredInfluencers: "", // Initialize the new field
-//     requirements: "",
-//   });
-//   const [loading, setLoading] = useState(false);
-//   const createCampaign = useMutation(api.campaign.createCampaign);
-//   const navigate = useNavigate();
-
-//   const handleNext = () => setStep(step + 1);
-//   const handleBack = () => setStep(step - 1);
-
-//   // The field parameter should be a key of CampaignFormData
-//   const handleChange = (field: keyof CampaignFormData, value: string | string[]) => {
-//     // Special handling for contentTypes if it's an array
-//     if (field === "contentTypes") {
-//       setForm(f => ({ ...f, [field]: value as string[] }));
-//     } else {
-//       setForm(f => ({ ...f, [field]: value as string }));
-//     }
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       const campaignData: CreateCampaignMutationArgs = {
-//         title: form.title,
-//         description: form.description,
-//         budget: form.budget ? Number(form.budget) : undefined,
-//         targetAudience: form.targetAudience || undefined,
-//         contentTypes: form.contentTypes.length > 0 ? form.contentTypes : undefined,
-//         duration: form.duration || undefined,
-//         startDate: form.startDate || undefined,
-//         endDate: form.endDate || undefined,
-//         status: form.status,
-//         role: form.role,
-//         requirements: form.requiredInfluencers ? `Required Influencers: ${form.requiredInfluencers}. ${form.requirements}` : form.requirements || undefined,
-//       };
-
-//       await createCampaign(campaignData);
-//       toast({
-//         title: "Success",
-//         description: "Campaign created successfully!",
-//         variant: "success",
-//       });
-//       navigate("/brand/dashboard");
-//     } catch (error) {
-//       toast({
-//         title: "Error",
-//         description: "Failed to create campaign. Please try again.",
-//         variant: "destructive",
-//       });
-//       console.error("Error creating campaign:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow space-y-6 animate-fade-in">
-//       <h2 className="text-2xl font-bold mb-4">Create a New Campaign</h2>
-//       <form onSubmit={handleSubmit}>
-//         {step === 1 && (
-//           <div className="space-y-4">
-//             <Input
-//               placeholder="Campaign Title"
-//               value={form.title}
-//               onChange={e => handleChange("title", e.target.value)}
-//               required
-//             />
-//             <Textarea
-//               placeholder="Describe your campaign goals and requirements"
-//               value={form.description}
-//               onChange={e => handleChange("description", e.target.value)}
-//               required
-//             />
-//             <Button type="button" onClick={handleNext} className="w-full">
-//               Next
-//             </Button>
-//           </div>
-//         )}
-//         {step === 2 && (
-//           <div className="space-y-4">
-//             <Input
-//               placeholder="Target Audience (e.g., 18-25, USA, fashion lovers)"
-//               value={form.targetAudience}
-//               onChange={e => handleChange("targetAudience", e.target.value)}
-//             />
-//             <Input
-//               type="number"
-//               placeholder="Number of Influencers Needed"
-//               value={form.requiredInfluencers}
-//               onChange={e => handleChange("requiredInfluencers", e.target.value)}
-//               min="1"
-//             />
-//             <div>
-//               <label className="block mb-2 font-medium">Content Types</label>
-//               <div className="flex gap-2">
-//                 {contentTypeOptions.map(opt => (
-//                   <Button
-//                     key={opt.value}
-//                     type="button"
-//                     variant={form.contentTypes.includes(opt.value) ? "default" : "outline"}
-//                     onClick={() =>
-//                       handleChange(
-//                         "contentTypes",
-//                         form.contentTypes.includes(opt.value)
-//                           ? form.contentTypes.filter(v => v !== opt.value)
-//                           : [...form.contentTypes, opt.value]
-//                       )
-//                     }
-//                   >
-//                     {opt.label}
-//                   </Button>
-//                 ))}
-//               </div>
-//             </div>
-//             <Button type="button" onClick={handleBack} variant="outline">
-//               Back
-//             </Button>
-//             <Button type="button" onClick={handleNext} className="ml-2">
-//               Next
-//             </Button>
-//           </div>
-//         )}
-//         {step === 3 && (
-//           <div className="space-y-4">
-//             <Input
-//               type="number"
-//               placeholder="Budget (USD)"
-//               value={form.budget}
-//               onChange={e => handleChange("budget", e.target.value)}
-//             />
-//             <Input
-//               type="text"
-//               placeholder="Campaign Duration (e.g., 1 month)"
-//               value={form.duration}
-//               onChange={e => handleChange("duration", e.target.value)}
-//             />
-//             <Input
-//               type="date"
-//               placeholder="Start Date"
-//               value={form.startDate}
-//               onChange={e => handleChange("startDate", e.target.value)}
-//             />
-//             <Input
-//               type="date"
-//               placeholder="End Date"
-//               value={form.endDate}
-//               onChange={e => handleChange("endDate", e.target.value)}
-//             />
-//             <Button type="button" onClick={handleBack} variant="outline">
-//               Back
-//             </Button>
-//             <Button type="submit" className="ml-2" disabled={loading}>
-//               {loading ? "Creating..." : "Create Campaign"}
-//             </Button>
-//           </div>
-//         )}
-//       </form>
-//     </div>
-//   );
-// }
 
 
 

@@ -145,7 +145,7 @@ export const createOrGetUser = mutation({
       throw new Error("Called createOrGetUser without authentication");
     }
 
-    // Extract role from Clerk public metadata
+ 
     if (typeof identity.publicMetadata !== 'object' || identity.publicMetadata === null) {
       throw new Error("User identity public metadata is missing or malformed");
     }
@@ -158,7 +158,7 @@ export const createOrGetUser = mutation({
 
     const role = publicMetadata.role;
 
-    // Check if the user already exists
+ 
     console.log("createOrGetUser: Checking for existing user with tokenIdentifier:", identity.tokenIdentifier);
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
 
@@ -167,7 +167,6 @@ export const createOrGetUser = mutation({
       return user._id;
     }
 
-    // If the user doesn't exist, create a new one
     console.log("createOrGetUser: Creating new user with tokenIdentifier:", identity.tokenIdentifier);
     const userId = await ctx.db.insert("users", {
       tokenIdentifier: identity.tokenIdentifier,
@@ -234,9 +233,9 @@ export const hasCompletedOnboarding = query({
 
 
 export const checkInfluencerProfile = mutation({
-  args: { identifier: v.string() }, // username or email
+  args: { identifier: v.string() }, 
   handler: async (ctx, { identifier }) => {
-    // Find user by username or email
+
     const user = await ctx.db
       .query("users")
       .filter(q =>
@@ -248,7 +247,6 @@ export const checkInfluencerProfile = mutation({
       .unique();
     if (!user) return false;
 
-    // Check if profile exists for this user
     const profile = await ctx.db
       .query("profiles")
       .withIndex("by_userId", q => q.eq("userId", user._id))
@@ -275,7 +273,7 @@ export const getUserByIdentifier = query({
 });
 
 export const getUserRoleByIdentifier = action({
-  args: { identifier: v.string() }, // username or email
+  args: { identifier: v.string() }, 
   handler: async (
     ctx,
     { identifier }

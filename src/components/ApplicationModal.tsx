@@ -4,18 +4,18 @@ import { useMutation, useQuery } from 'convex/react';
 import { Button } from './ui/button';
 import { api } from 'convex/_generated/api';
 import { useToast } from './ui/use-toast';
-//import logo from '../assets/logo.png'; // Adjust the path as necessary
+//import logo from '../assets/logo.png';
 
 
 const ApplicationModal = ({ campaignId, onClose }) => {
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pitch, setPitch] = useState("");
   const applyToCampaign = useMutation(api.campaign.applyToCampaign);
   const withdrawApplication = useMutation(api.campaign.withdrawApplication);
   const { toast } = useToast();
 
-  // Check if user has already applied
+
   const existingApplication = useQuery(api.campaign.campaignsForInfluencer)?.find(
     campaign => campaign._id === campaignId
   );

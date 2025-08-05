@@ -3,7 +3,8 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
-// Insert or update a brand profile for the current user
+
+
 export const insertBrandProfile = mutation({
   args: {
     companyName: v.string(),
@@ -46,7 +47,6 @@ export const insertBrandProfile = mutation({
       if (!user) throw new Error("Failed to create user");
     }
 
-    // Upsert brand profile: patch if exists, insert if not
     const existing = await ctx.db
       .query("brands")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
@@ -64,7 +64,6 @@ export const insertBrandProfile = mutation({
   },
 });
 
-// Query to get the current user's brand profile
 export const getMyBrandProfile = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -106,7 +105,6 @@ export const updateBrandProfile = mutation({
       .first();
 
     if (!brandProfile) {
-      // Create new brand profile if it doesn't exist
       const newProfileId = await ctx.db.insert("brands", {
         userId: userId as Id<"users">,
         companyName: args.companyName,

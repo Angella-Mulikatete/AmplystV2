@@ -19,12 +19,10 @@ import BrandDiscovery from "./components/influencer/BrandDiscovery";
 import BrandDiscoveryPage from "./pages/BrandDiscoveryPage";
 import InfluencerCampaigns from "./pages/InfluencerCampaigns";
 import InfluencerApplication from "./pages/InfluencerApplications";
-
+import CreateContent from "./pages/CreateContent";
 
 
 const queryClient = new QueryClient();
-
-
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -38,7 +36,6 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/onboarding/influencer" element={<InfluencerOnboarding />} />
           <Route path="/onboarding/brand" element={<BrandOnboarding userType="brand" />} />
-          {/* <Route path="/onboarding/brand" element={<CampaignCreation />} /> */}
           <Route path="/brand/dashboard" element={<BrandDashboard />} />
           <Route path="/brand/campaigns/create" element={<CampaignCreation />} />
           <Route path="/influencer/discover" element={<InfluencerDiscovery />} />
@@ -47,7 +44,7 @@ const App = () => (
           <Route path="/brand/applications" element={<InfluencerApplication />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/influencer/campaigns" element={<InfluencerCampaigns />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/createcontent" element={<CreateContent />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
