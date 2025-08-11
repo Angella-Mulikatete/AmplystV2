@@ -35,21 +35,21 @@ const Index = () => {
       quote: "Amplyst connected us with the perfect micro-influencers for our sustainable fashion line. The results exceeded our expectations with a 300% increase in sales within just 3 months.",
       name: "Claudia Vine",
       role: "Senior Manager, Social and Influencer Strategy",
-      imageSrc: {person}
+      imageSrc: person
     },
     {
       id: 2,
       quote: "As a nano-influencer with 5K followers, I finally found brands that value authentic engagement over follower count. I've earned $2,000 in my first month on the platform!",
       name: "Sarah Johnson",
       role: "Nano-Influencer",
-      imageSrc: {person}
+      imageSrc: person
     },
     {
       id: 3,
       quote: "The platform's AI-powered matching system helped us find creators who truly align with our brand values. Our campaign ROI increased by 250% compared to traditional marketing.",
       name: "Michael Chen",
       role: "Marketing Director",
-      imageSrc: {person}
+      imageSrc: person
     }
   ];
 
