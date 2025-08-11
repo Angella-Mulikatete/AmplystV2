@@ -239,6 +239,7 @@ import {
   X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import logo from '@/assets/logo.png'
 
 // Dashboard Layout Component
 const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co" }) => {
@@ -362,7 +363,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co" }
         {/* Logo */}
         <div className={`p-4 ${(isMobile || isTablet) && sidebarOpen ? 'hidden' : 'block'} ${isDesktop ? 'border-b border-gray-200' : ''}`}>
           <img 
-            src="/src/assets/logo.png"
+            src={logo} 
             alt="Amplyst Logo"
             className={`object-contain ${isMobile ? 'w-32 h-10' : 'w-30 h-8'}`}
           />
