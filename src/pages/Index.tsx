@@ -146,10 +146,10 @@ const Index = () => {
             
             {/* Call-to-Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 relative z-10">
-              <Button size="lg" className="bg-primary hover:bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold" onClick={() => navigate("/register?role=influencer")}>
+              <Button size="lg" className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90 text-white px-8 py-4 rounded-full text-lg font-semibold" onClick={() => navigate("/register?role=influencer")}>
                 Join as Creator
               </Button>
-              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary-50 px-8 py-4 rounded-full text-lg font-semibold" onClick={() => navigate("/register?role=brand")}>
+              <Button size="lg" variant="outline"  onClick={() => navigate("/register?role=brand")}>
                 Find Influencers
               </Button>
             </div>
@@ -159,7 +159,7 @@ const Index = () => {
         </div>
         
         {/* Decorative Blob */}
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-br from-orange-400 to-red-500 rounded-full opacity-20 transform translate-x-32 translate-y-32"></div>
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-br from-[#3A7CA5] to-[#88B04B] rounded-full opacity-20 transform translate-x-32 translate-y-32"></div>
       </section>
 
       {/* Influencer Section */}
@@ -192,7 +192,7 @@ const Index = () => {
         </div>
       </section>
 
-             {/* How It Works Section */}
+      {/* How It Works Section */}
       <section id="how-it-works" className="w-full bg-white relative">
         <div className="container mx-auto py-20 px-4">
           {/* Top Section - Centered Text */}
