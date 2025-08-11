@@ -11,6 +11,8 @@ import { api } from "../../convex/_generated/api";
 import Onboarding from "@/components/onboarding";
 import heroImage from '@/assets/heroImage.jpeg';
 import logo from '@/assets/logo.png';
+import influencer from '@/assets/influencer.jpg'
+import how from '@/assets/how-it-works.webm'
 import { useState, useEffect } from "react";
 
 const Index = () => {
@@ -176,7 +178,7 @@ const Index = () => {
             {/* Right Section - Single Image */}
             <div className="relative">
               <img
-                src="/src/assets/influencer.jpg"
+                src={influencer}
                 alt="Influencer profile"
                 className="w-full h-auto rounded-lg shadow-lg"
               />
@@ -186,7 +188,7 @@ const Index = () => {
         
         {/* Abstract Background Elements */}
         <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute bottom-0 right-0 w-32 h-32 bg-primary-200 rounded-full opacity-30"></div>
+          <div className="absolute bottom-0 right-0 w-32 h-32 bg-primary-200 rounded-full opacity-30"></div>
           <div className="absolute top-1/4 right-1/3 w-16 h-16 bg-blue-200 rounded-full opacity-40"></div>
           <div className="absolute bottom-1/3 left-1/4 w-20 h-20 bg-yellow-200 rounded-full opacity-30"></div>
         </div>
@@ -220,7 +222,7 @@ const Index = () => {
                    loop 
                    playsInline
                  >
-                   <source src="/src/assets/how-it-works.webm" type="video/webm" />
+                   <source src={how} type="video/webm" />
                    Your browser does not support the video tag.
                  </video>
                </div>
