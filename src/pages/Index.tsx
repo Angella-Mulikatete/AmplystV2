@@ -871,7 +871,7 @@ const Index = () => {
         </div>
       </section> */}
 
-  <section id="features" className="py-12 md:py-16 lg:py-20 px-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      <section id="features" className="py-12 md:py-16 lg:py-20 px-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div 
@@ -1124,7 +1124,7 @@ const Index = () => {
           />
         ))}
       </div>
-    </section>
+      </section>
 
       {/* Success Stories Section */}
 
