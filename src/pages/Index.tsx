@@ -15,6 +15,7 @@ import influencer from '@/assets/influencer.jpg'
 import how from '@/assets/how-it-works.webm'
 import person from "@/assets/person.jpg"
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -59,6 +60,57 @@ const Index = () => {
 
   const prevTestimonial = () => {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const contentBlocks = [
+    {
+      title: "The Social Singularity is Here",
+      content: "Social platforms have overtaken TV in audience size—flipping the marketing landscape forever."
+    },
+    {
+      title: "Creator Economy Revolution", 
+      content: "The creator economy is now worth over $100 billion, with creators becoming the new media companies and distribution channels."
+    },
+    {
+      title: "Authentic Connections Drive Results",
+      content: "Consumers trust creators more than traditional advertising. Authentic partnerships deliver 3x higher engagement rates."
+    }
+  ];
+
+  // Auto-advance content blocks every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % contentBlocks.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const flipVariants = {
+    enter: {
+      rotateY: -90,
+      opacity: 0,
+      scale: 0.8,
+    },
+    center: {
+      rotateY: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeInOut"
+      }
+    },
+    exit: {
+      rotateY: 90,
+      opacity: 0,
+      scale: 0.8,
+      transition: {
+        duration: 0.6,
+        ease: "easeInOut"
+      }
+    }
   };
 
 
@@ -195,10 +247,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="w-full bg-white relative">
+      {/* <section id="how-it-works" className="w-full bg-white relative">
         <div className="container mx-auto py-20 px-4">
-          {/* Top Section - Centered Text */}
           <div className="text-center mb-16">
                             <div className="text-sm font-semibold text-primary mb-4">
               MARKETING'S IMPERATIVE
@@ -211,9 +261,8 @@ const Index = () => {
             </p>
           </div>
           
-                     {/* Offset Layout - Video Left, Content Right */}
+                 
            <div className="relative flex items-start">
-             {/* Video - Sticky on Left */}
              <div className="sticky top-20 w-1/2 pr-8">
                <div className="relative">
                  <video 
@@ -229,9 +278,9 @@ const Index = () => {
                </div>
              </div>
              
-             {/* Content Blocks - Scrollable on Right */}
+         
              <div className="w-1/2 pl-8 space-y-16" id="how-it-works-content">
-               {/* Content Block 1 */}
+           
                <div className="min-h-[150px]">
                  <h3 className="text-2xl font-bold text-primary mb-4">
                    The Social Singularity is Here
@@ -241,7 +290,7 @@ const Index = () => {
                  </p>
                </div>
                
-               {/* Content Block 2 */}
+      
                <div className="min-h-[150px]">
                  <h3 className="text-2xl font-bold text-primary mb-4">
                    Creator Economy Revolution
@@ -251,7 +300,6 @@ const Index = () => {
                  </p>
                </div>
                
-               {/* Content Block 3 */}
                <div className="min-h-[150px]">
                  <h3 className="text-2xl font-bold text-primary mb-4">
                    Authentic Connections Drive Results
@@ -262,6 +310,131 @@ const Index = () => {
                </div>
              </div>
            </div>
+        </div>
+      </section> */}
+
+      <section id="how-it-works" className="w-full bg-white relative">
+        <div className="container mx-auto py-12 md:py-20 px-4">
+          {/* Top Section - Centered Text */}
+          <div className="text-center mb-12 md:mb-16">
+            <div className="text-sm font-semibold text-primary mb-4">
+              MARKETING'S IMPERATIVE
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Make Creator Strategy a Marketing Pillar
+            </h2>
+            <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
+              Influencer marketing is no longer a test—it's a strategic necessity.
+            </p>
+          </div>
+
+          {/* Desktop Layout - Video Left, Content Right */}
+          <div className="hidden lg:flex relative items-start">
+            {/* Video - Sticky on Left */}
+            <div className="sticky top-20 w-1/2 pr-8">
+              <div className="relative">
+                <video
+                  className="w-full h-auto rounded-lg shadow-lg bg-transparent"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src={how} type="video/webm" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+
+            {/* Content Blocks - Scrollable on Right with Flip Animation */}
+            <div className="w-1/2 pl-8" id="how-it-works-content">
+              <div className="min-h-[400px] relative" style={{ perspective: '1000px' }}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentIndex}
+                    variants={flipVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    className="absolute inset-0 flex flex-col justify-center"
+                  >
+                    <h3 className="text-2xl font-bold text-primary mb-4">
+                      {contentBlocks[currentIndex].title}
+                    </h3>
+                    <p className="text-lg text-gray-700 leading-relaxed">
+                      {contentBlocks[currentIndex].content}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Dots */}
+              {/* <div className="flex justify-center space-x-3 mt-8">
+                {contentBlocks.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                      index === currentIndex ? 'bg-primary' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div> */}
+            </div>
+          </div>
+
+          {/* Mobile/Tablet Layout - Stacked */}
+          <div className="lg:hidden">
+            {/* Video */}
+            <div className="mb-8">
+              <div className="relative">
+                <video
+                  className="w-full h-auto rounded-lg shadow-lg bg-transparent"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src={how} type="video/webm" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+
+            {/* Content with Flip Animation */}
+            <div className="min-h-[300px] md:min-h-[400px] relative" style={{ perspective: '1000px' }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIndex}
+                  variants={flipVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute inset-0 flex flex-col justify-center text-center"
+                >
+                  <h3 className="text-xl md:text-2xl font-bold text-primary mb-4">
+                    {contentBlocks[currentIndex].title}
+                  </h3>
+                  <p className="text-base md:text-lg text-gray-700 leading-relaxed px-4">
+                    {contentBlocks[currentIndex].content}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Navigation Dots */}
+            {/* <div className="flex justify-center space-x-3 mt-6">
+              {contentBlocks.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                    index === currentIndex ? 'bg-primary' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div> */}
+          </div>
         </div>
       </section>
 
