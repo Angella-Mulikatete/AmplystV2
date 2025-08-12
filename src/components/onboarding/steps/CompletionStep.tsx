@@ -128,7 +128,7 @@ const CompletionStep = ({ data }: CompletionStepProps) => {
         </div>
       </div>
 
-      <div className="space-y-3">
+      {/* <div className="space-y-3">
         <Button 
             className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-poppins"
             onClick={handleComplete}>
@@ -137,7 +137,7 @@ const CompletionStep = ({ data }: CompletionStepProps) => {
         <Button variant="outline" className="w-full">
           Browse Available Campaigns
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };
