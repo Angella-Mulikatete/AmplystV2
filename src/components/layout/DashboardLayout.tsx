@@ -299,18 +299,20 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - NOW STICKY */}
       <aside className={`
-        ${isMobile || isTablet ? 'fixed' : 'static'} 
-        flex flex-col min-h-screen top-0 left-0 h-full ${getSidebarWidth()} 
+        ${isMobile || isTablet ? 'fixed' : 'sticky'} 
+        ${isMobile || isTablet ? 'top-0' : 'top-0'} 
+        flex flex-col h-screen ${getSidebarWidth()} 
         bg-white/95 backdrop-blur-xl border-r border-gray-200/50 z-50 
         transform transition-all duration-500 ease-out
         ${(isMobile || isTablet) ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
         ${isDesktop ? 'shadow-xl shadow-gray-900/5' : 'shadow-2xl shadow-gray-900/20'}
+        overflow-hidden
       `}>
         {/* Mobile/Tablet Close Button */}
         {(isMobile || isTablet) && (
-          <div className="flex justify-between items-center p-6 border-b border-gray-200/50 bg-gradient-to-r from-primary-50 to-primary-100/50">
+          <div className="flex justify-between items-center p-6 border-b border-gray-200/50 bg-gradient-to-r from-primary-50 to-primary-100/50 flex-shrink-0">
             <div className="font-bold text-gray-800 text-lg">Navigation</div>
             <Button
               variant="ghost"
@@ -324,7 +326,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         )}
 
         {/* Logo */}
-        <div className={`p-6 ${(isMobile || isTablet) && sidebarOpen ? 'hidden' : 'block'} ${isDesktop ? 'border-b border-gray-200/30' : ''}`}>
+        <div className={`p-6 flex-shrink-0 ${(isMobile || isTablet) && sidebarOpen ? 'hidden' : 'block'} ${isDesktop ? 'border-b border-gray-200/30' : ''}`}>
           <img 
             src={logo} 
             alt="Amplyst Logo"
@@ -332,8 +334,8 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
           />
         </div>
 
-        {/* Navigation Items */}
-        <nav className={`${isMobile ? 'p-4' : 'p-6'} space-y-2 flex-1`}>
+        {/* Navigation Items - NOW SCROLLABLE */}
+        <nav className={`${isMobile ? 'p-4' : 'p-6'} space-y-2 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400`}>
           {getNavItems().map((item, index) => {
             const styles = getActiveStyles(item);
             const isComingSoon = item.comingSoon || false; // Handle undefined
@@ -441,8 +443,8 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
           })}
         </nav>
 
-        {/* User Info Section - Enhanced */}
-        <div className="mt-auto p-4 border-t border-gray-200/30 bg-gradient-to-r from-gray-50/50 to-gray-100/30">
+        {/* User Info Section - Enhanced and STICKY AT BOTTOM */}
+        <div className="mt-auto p-4 border-t border-gray-200/30 bg-gradient-to-r from-gray-50/50 to-gray-100/30 flex-shrink-0">
           <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/60 shadow-sm border border-white/50">
             <Avatar className={`${isMobile ? 'w-12 h-12' : 'w-10 h-10'} ring-2 ring-primary-100 shadow-sm`}>
               <AvatarImage src="" alt={userName} />
