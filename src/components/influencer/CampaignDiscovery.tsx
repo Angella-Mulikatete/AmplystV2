@@ -18,13 +18,23 @@ import { Doc, Id } from "../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import ApplicationModal from "../ApplicationModal";
+import { useNavigate } from "react-router-dom";
+
+interface CampaignWithCreator extends Doc<"campaigns"> {
+  creatorName?: string;
+  creatorHandle?: string;
+  creatorVerified?: boolean;
+  creatorProfilePicture?: string;
+}
 
 interface CampaignDiscoveryProps {
-  campaigns: Doc<"campaigns">[];
+  campaigns: CampaignWithCreator[];
+  // campaigns: Doc<"campaigns">;
   profile: Doc<"profiles">;
 }
 
-  const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
+const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNiche, setSelectedNiche] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("");
@@ -34,7 +44,7 @@ interface CampaignDiscoveryProps {
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         campaign.description.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesNiche = !selectedNiche || 
                          (campaign.targetAudience && campaign.targetAudience.toLowerCase().includes(selectedNiche.toLowerCase())) ||
@@ -59,8 +69,14 @@ interface CampaignDiscoveryProps {
     return 0;
   });
 
+  console.log("filtered campaigns in campaign discovery", filteredCampaigns);
+
   const applications = useQuery(api.campaign.getTotalApplicationsForMyCampaigns);
 
+  const handleApplyClick = (campaignId: Id<"campaigns">) => {
+    navigate(`/campaigns/${campaignId}/apply`);
+  };
+  
   function CampaignListByNiche({ selectedNiche }) {
 
     const campaigns = selectedNiche ? useQuery(api.campaign.campaignsByNiche, { niche: selectedNiche }) : null;
@@ -174,7 +190,7 @@ interface CampaignDiscoveryProps {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg font-semibold text-gray-900">{campaign.title}</CardTitle>
-                  <p className="text-sm text-gray-600 mt-1">by {campaign.creatorUserId}</p> 
+                  {/* <p className="text-sm text-gray-600 mt-1">by {campaign.creatorName}</p>  */}
                 </div>
               </div>
             </CardHeader>
@@ -220,10 +236,11 @@ interface CampaignDiscoveryProps {
                 <Button 
                   className="flex-1 bg-[#3A7CA5] hover:bg-[#3A7CA5]/90 text-white"
                   size="sm"
-                  onClick={() => {
-                    setSelectedCampaignId(campaign._id);
-                    setShowModal(true);
-                  }}
+                  // onClick={() => {
+                  //   setSelectedCampaignId(campaign._id);
+                  //   setShowModal(true);
+                  // }}
+                  onClick={() => handleApplyClick(campaign._id)}
                 >
                   Apply Now
                 </Button>

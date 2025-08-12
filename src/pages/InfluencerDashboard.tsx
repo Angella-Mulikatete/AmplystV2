@@ -28,6 +28,7 @@ const InfluencerDashboard = () => {
   // Live data queries
   const profile = useQuery(api.users.getInfluencerProfile, {});
   const allCampaigns = useQuery(api.campaign.allCampaigns);
+  // const allCampaigns = useQuery(api.campaign.allCampaignsWithCreators);
   const activeCampaigns = useQuery(api.campaign.activeForInfluencer);
   const applications = useQuery(api.applications.listInfluencerApplications);
   const allBrands = useQuery(api.brands.listBrands);

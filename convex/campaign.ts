@@ -114,6 +114,36 @@ import { api } from "./_generated/api";
     }
   });
 
+  export const allCampaignsWithCreators = query({
+    handler: async (ctx) => {
+      const campaigns = await ctx.db.query("campaigns").collect();
+      
+      // Get creator details for each campaign
+      const campaignsWithCreators = await Promise.all(
+        campaigns.map(async (campaign) => {
+          // Get the creator's profile
+          const creatorProfile = await ctx.db
+            .query("profiles")
+            .withIndex("by_userId", (q) => q.eq("userId", campaign.creatorUserId))
+            .first();
+          
+          // Get the creator's user info as fallback
+          const creatorUser = await ctx.db.get(campaign.creatorUserId);
+          
+          return {
+            ...campaign,
+            creatorName: creatorProfile?.name || creatorProfile?.companyName || creatorUser?.username || "Unknown Creator",
+            creatorHandle: creatorProfile?.handle,
+            creatorVerified: creatorProfile?.verified,
+            creatorProfilePicture: creatorProfile?.profilePictureUrl,
+          };
+        })
+      );
+      
+      return campaignsWithCreators;
+    }
+  });
+
 
   export const getCampaignById = query({
     args: { campaignId: v.id("campaigns") },
@@ -121,7 +151,6 @@ import { api } from "./_generated/api";
       return await ctx.db.get(args.campaignId);
     },
   });
-
 
   export const campaignsForInfluencer = query({
     handler: async (ctx) => {

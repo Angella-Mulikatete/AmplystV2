@@ -26,7 +26,7 @@ interface ApplicationWithCampaign {
   campaign: Doc<"campaigns"> | null; 
   contentTypes: string[];
 }
-const MyCampaigns = () => {
+const InfluencerCampaigns = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Doc<"campaigns"> | null>(null);
@@ -249,7 +249,7 @@ const MyCampaigns = () => {
   );
 };
 
-export default MyCampaigns;
+export default InfluencerCampaigns;
 
 
 

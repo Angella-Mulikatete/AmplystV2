@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactNode, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,13 +28,28 @@ import logo from '@/assets/logo.png'
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 
+// Define the NavItem interface
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<any>;
+  tabValue?: string;
+  description: string;
+  comingSoon?: boolean;
+}
 
 // Dashboard Layout Component
-const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", activeTab, onTabChange }) => {
+const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", activeTab, onTabChange }: {
+  children: React.ReactNode;
+  userRole?: "brand" | "influencer" | "agency";
+  userName?: string;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [screenSize, setScreenSize] = useState('desktop');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [hoveredItem, setHoveredItem] = useState(null);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -63,8 +79,8 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
   const isTablet = screenSize === 'tablet';
   const isDesktop = screenSize === 'desktop';
 
-  const getNavItems = () => {
-    const commonItems = [
+  const getNavItems = (): NavItem[] => {
+    const commonItems: NavItem[] = [
       { 
         label: "Dashboard", 
         href: `/${userRole}/dashboard`, 
@@ -88,7 +104,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
       },
     ];
 
-    const brandItems = [
+    const brandItems: NavItem[] = [
       ...commonItems.slice(0, 1), // Dashboard
       { 
         label: "Discover Influencers", 
@@ -118,7 +134,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
       ...commonItems.slice(1), // Messages, Settings
     ];
 
-    const influencerItems = [
+    const influencerItems: NavItem[] = [
       { 
         label: "Dashboard", 
         href: "/influencer/dashboard", 
@@ -163,7 +179,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
       },
     ];
 
-    const agencyItems = [
+    const agencyItems: NavItem[] = [
       ...commonItems.slice(0, 1), // Dashboard
       { 
         label: "Manage Brands", 
@@ -205,7 +221,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
     }
   };
 
-  const handleNavClick = (item) => {
+  const handleNavClick = (item: NavItem) => {
     if (isMobile || isTablet) setSidebarOpen(false);
     
     // Check if the feature is coming soon
@@ -233,14 +249,14 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
     return 'w-72'; // Desktop - increased width for better spacing
   };
 
-  const isActiveTab = (item) => {
+  const isActiveTab = (item: NavItem) => {
     return item.tabValue && activeTab === item.tabValue;
   };
 
-  const getActiveStyles = (item) => {
+  const getActiveStyles = (item: NavItem) => {
     const isActive = isActiveTab(item);
     const isHovered = hoveredItem === item.label;
-    const isComingSoon = item.comingSoon;
+    const isComingSoon = item.comingSoon || false; // Use || false to handle undefined
     
     if (isActive) {
       return {
@@ -320,6 +336,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         <nav className={`${isMobile ? 'p-4' : 'p-6'} space-y-2 flex-1`}>
           {getNavItems().map((item, index) => {
             const styles = getActiveStyles(item);
+            const isComingSoon = item.comingSoon || false; // Handle undefined
             
             return (
               <div
@@ -346,7 +363,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
                   <div className={`
                     absolute inset-0 bg-gradient-to-r from-primary-500/10 to-primary-600/10 
                     opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                    ${item.comingSoon ? 'from-amber-400/10 to-orange-400/10' : ''}
+                    ${isComingSoon ? 'from-amber-400/10 to-orange-400/10' : ''}
                   `} />
                   
                   {/* Icon container */}
@@ -359,13 +376,13 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
                       className={`
                         w-full h-full transition-all duration-300 
                         ${styles.icon}
-                        ${hoveredItem === item.label && !item.comingSoon ? 'transform scale-110' : ''}
+                        ${hoveredItem === item.label && !isComingSoon ? 'transform scale-110' : ''}
                         ${isActiveTab(item) ? 'drop-shadow-sm' : ''}
-                        ${item.comingSoon ? 'opacity-60' : ''}
+                        ${isComingSoon ? 'opacity-60' : ''}
                       `} 
                     />
                     {/* Coming Soon Badge */}
-                    {item.comingSoon && (
+                    {isComingSoon && (
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full flex items-center justify-center">
                         <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                       </div>
@@ -387,9 +404,9 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
                       <span className={`
                         block text-xs opacity-0 group-hover:opacity-70 
                         transition-all duration-300 mt-1 truncate
-                        ${isActiveTab(item) ? 'text-white/80' : item.comingSoon ? 'text-amber-600/80' : 'text-gray-500'}
+                        ${isActiveTab(item) ? 'text-white/80' : isComingSoon ? 'text-amber-600/80' : 'text-gray-500'}
                       `}>
-                        {item.comingSoon ? `${item.description} - Coming Soon!` : item.description}
+                        {isComingSoon ? `${item.description} - Coming Soon!` : item.description}
                       </span>
                     )}
                     
@@ -397,9 +414,9 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
                     {isMobile && item.description && (
                       <span className={`
                         block text-xs truncate mt-1
-                        ${item.comingSoon ? 'text-amber-500' : 'text-gray-400'}
+                        ${isComingSoon ? 'text-amber-500' : 'text-gray-400'}
                       `}>
-                        {item.comingSoon ? `${item.description} - Coming Soon!` : item.description}
+                        {isComingSoon ? `${item.description} - Coming Soon!` : item.description}
                       </span>
                     )}
                   </div>
@@ -415,8 +432,8 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
                   <div className={`
                     absolute left-0 top-1/2 transform -translate-y-1/2 w-1 rounded-r-full
                     transition-all duration-300 ease-out
-                    ${item.comingSoon ? 'bg-amber-400' : 'bg-primary-500'}
-                    ${hoveredItem === item.label && !item.comingSoon ? 'h-8 opacity-100' : 'h-0 opacity-0'}
+                    ${isComingSoon ? 'bg-amber-400' : 'bg-primary-500'}
+                    ${hoveredItem === item.label && !isComingSoon ? 'h-8 opacity-100' : 'h-0 opacity-0'}
                   `} />
                 </Button>
               </div>
