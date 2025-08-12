@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ApplicationModal from "../ApplicationModal";
+import { useNavigate } from "react-router-dom";
 
 interface BrandDiscoveryProps {
   brands: Doc<"brands">[];
@@ -15,6 +16,7 @@ interface BrandDiscoveryProps {
 }
 
 const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) => {
+   const navigate = useNavigate();
   const [selectedBrand, setSelectedBrand] = useState<Doc<"brands"> | null>(null);
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [brandCampaigns, setBrandCampaigns] = useState<Doc<"campaigns">[]>([]);
@@ -45,8 +47,9 @@ const BrandDiscovery = ({ brands = [], campaigns = [] }: BrandDiscoveryProps) =>
   };
 
   const handleApplyNow = (campaignId: Id<"campaigns">) => {
-    setSelectedCampaignId(campaignId);
-    setShowModal(true);
+    // setSelectedCampaignId(campaignId);
+    // setShowModal(true);
+      navigate(`/campaigns/${campaignId}/apply`);
   };
 
   if (!brands || !campaigns) {
