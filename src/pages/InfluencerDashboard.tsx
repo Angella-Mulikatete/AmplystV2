@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { api } from "../../convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
@@ -17,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 const InfluencerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -307,11 +307,15 @@ const InfluencerDashboard = () => {
   );
 
   // Calculate approved applications count
-  const approvedApplicationsCount = applications? applications.filter(app => app.status === 'approved').length: 0;
+  const approvedApplicationsCount = applications ? applications.filter(app => app.status === 'approved').length : 0;
 
   if (!profile || !allCampaigns || !activeCampaigns || !applications || !allBrands) {
     return (
-      <DashboardLayout userRole="influencer">
+      <DashboardLayout 
+        userRole="influencer"
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
         <div className="flex items-center justify-center min-h-[200px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3A7CA5]"></div>
         </div>
@@ -388,8 +392,7 @@ const InfluencerDashboard = () => {
               <div>
                 <p className="text-sm text-gray-600">Approved Applications</p>
                 <p className="text-2xl font-bold text-primary-800">
-                  {/* {activeCampaigns.filter(campaign => campaign.status === 'active').length} */}
-                   {approvedApplicationsCount}
+                  {approvedApplicationsCount}
                 </p>
               </div>
               <Target className="w-8 h-8 text-blue-500" />
@@ -563,9 +566,10 @@ const InfluencerDashboard = () => {
   return (
     <SignedIn>
       <DashboardLayout 
-      userRole="influencer" 
-      userName={profile.name} 
-      // userAvatar={profile.profilePictureUrl}
+        userRole="influencer" 
+        userName={profile.name}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       >
         <div className="space-y-6">
           {/* Navigation Tabs */}
@@ -604,14 +608,3 @@ const InfluencerDashboard = () => {
 };
 
 export default InfluencerDashboard;
-
-
-
-
-
-
-
-
-
-
-

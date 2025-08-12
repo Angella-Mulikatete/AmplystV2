@@ -24,7 +24,7 @@ interface CampaignDiscoveryProps {
   profile: Doc<"profiles">;
 }
 
-const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
+  const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNiche, setSelectedNiche] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("");
