@@ -72,7 +72,11 @@ export const getMyBrandProfile = query({
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", identity.email!))
       .first();
+
+      console.log("user in brand.ts", user);
+
     if (!user) return null;
+
     return await ctx.db
       .query("brands")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))

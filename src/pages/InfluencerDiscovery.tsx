@@ -411,7 +411,7 @@ const InfluencerDiscovery = () => {
   const [engagement, setEngagement] = useState([2, 10]);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("all"); // Changed from "" to "all"
   const [sortBy, setSortBy] = useState("followerCount");
 
   const niches = [
@@ -426,7 +426,7 @@ const InfluencerDiscovery = () => {
     niche: selectedNiches.length > 0 ? selectedNiches[0] : undefined,
     minFollowers: followers[0],
     maxFollowers: followers[1],
-    location: selectedLocation || undefined,
+    location: selectedLocation !== "all" ? selectedLocation : undefined, // Updated condition
     minEngagement: engagement[0],
     maxEngagement: engagement[1],
     search: search || undefined,
@@ -550,7 +550,7 @@ const InfluencerDiscovery = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Locations</SelectItem>
+                    <SelectItem value="all">All Locations</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>{location}</SelectItem>
                     ))}

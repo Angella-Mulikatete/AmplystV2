@@ -70,6 +70,56 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
     agreeToTerms: false,
   });
 
+  // Validation functions for each step
+  const validateStep1 = () => {
+    return (
+      formData.companyName.trim() !== "" &&
+      formData.industry !== "" &&
+      formData.companySize !== "" &&
+      formData.description.trim() !== ""
+    );
+  };
+
+  const validateStep2 = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return (
+      formData.contactPerson.trim() !== "" &&
+      formData.businessEmail.trim() !== "" &&
+      emailRegex.test(formData.businessEmail) &&
+      formData.location.trim() !== ""
+    );
+  };
+
+  const validateStep3 = () => {
+    return (
+      formData.budgetRange !== "" &&
+      formData.campaignGoals.length > 0 &&
+      formData.targetAudience.trim() !== "" &&
+      formData.influencerType !== "" &&
+      formData.contentType !== ""
+    );
+  };
+
+  const validateStep4 = () => {
+    return formData.agreeToTerms;
+  };
+
+  // Check if current step is valid
+  const isCurrentStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return validateStep1();
+      case 2:
+        return validateStep2();
+      case 3:
+        return validateStep3();
+      case 4:
+        return validateStep4();
+      default:
+        return false;
+    }
+  };
+
   const handleNext = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
@@ -138,23 +188,24 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="companyName">{userType === 'brand' ? 'Company' : 'Agency'} Name</Label>
+                <Label htmlFor="companyName">{userType === 'brand' ? 'Company' : 'Agency'} Name *</Label>
                 <Input
                   id="companyName"
                   value={formData.companyName}
                   onChange={(e) => updateFormData('companyName', e.target.value)}
                   placeholder={`Enter your ${userType} name`}
                   required
+                  className={formData.companyName.trim() === "" ? "border-red-300" : ""}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="industry">Industry</Label>
+                  <Label htmlFor="industry">Industry *</Label>
                   <Select 
                     onValueChange={(value) => updateFormData('industry', value)}
                     value={formData.industry}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={formData.industry === "" ? "border-red-300" : ""}>
                       <SelectValue placeholder="Select industry" />
                     </SelectTrigger>
                     <SelectContent>
@@ -167,12 +218,12 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companySize">Company Size</Label>
+                  <Label htmlFor="companySize">Company Size *</Label>
                   <Select 
                     onValueChange={(value) => updateFormData('companySize', value)}
                     value={formData.companySize}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={formData.companySize === "" ? "border-red-300" : ""}>
                       <SelectValue placeholder="Select size" />
                     </SelectTrigger>
                     <SelectContent>
@@ -195,10 +246,12 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Company Description</Label>
+                <Label htmlFor="description">Company Description *</Label>
                 <textarea
                   id="description"
-                  className="w-full p-3 border border-gray-300 rounded-md resize-none h-24"
+                  className={`w-full p-3 border rounded-md resize-none h-24 ${
+                    formData.description.trim() === "" ? "border-red-300" : "border-gray-300"
+                  }`}
                   value={formData.description}
                   onChange={(e) => updateFormData('description', e.target.value)}
                   placeholder="Brief description of your company..."
@@ -217,32 +270,43 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contactPerson">Contact Name</Label>
+                <Label htmlFor="contactPerson">Contact Name *</Label>
                 <Input
                   id="contactPerson"
                   value={formData.contactPerson}
                   onChange={(e) => updateFormData('contactPerson', e.target.value)}
                   placeholder="Full name"
+                  className={formData.contactPerson.trim() === "" ? "border-red-300" : ""}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="businessEmail">Email Address</Label>
+                <Label htmlFor="businessEmail">Email Address *</Label>
                 <Input
                   id="businessEmail"
                   type="email"
                   value={formData.businessEmail}
                   onChange={(e) => updateFormData('businessEmail', e.target.value)}
                   placeholder="contact@company.com"
+                  className={
+                    formData.businessEmail.trim() === "" || 
+                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.businessEmail) 
+                      ? "border-red-300" : ""
+                  }
                 />
+                {formData.businessEmail.trim() !== "" && 
+                 !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.businessEmail) && (
+                  <p className="text-sm text-red-600">Please enter a valid email address</p>
+                )}
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location *</Label>
               <Input
                 id="location"
                 value={formData.location}
                 onChange={(e) => updateFormData('location', e.target.value)}
                 placeholder="City, Country"
+                className={formData.location.trim() === "" ? "border-red-300" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -265,12 +329,12 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Monthly Campaign Budget</Label>
+                <Label>Monthly Campaign Budget *</Label>
                 <Select 
                   onValueChange={(value) => updateFormData('budgetRange', value)}
                   value={formData.budgetRange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={formData.budgetRange === "" ? "border-red-300" : ""}>
                     <SelectValue placeholder="Select budget range" />
                   </SelectTrigger>
                   <SelectContent>
@@ -284,7 +348,9 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Primary Campaign Goals</Label>
+                <Label>Primary Campaign Goals * {formData.campaignGoals.length === 0 && (
+                  <span className="text-red-600 text-sm">(Select at least one)</span>
+                )}</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {campaignGoals.map((goal) => (
                     <Button
@@ -300,22 +366,24 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="targetAudience">Target Audience</Label>
+                <Label htmlFor="targetAudience">Target Audience *</Label>
                 <textarea
                   id="targetAudience"
-                  className="w-full p-3 border border-gray-300 rounded-md resize-none h-24"
+                  className={`w-full p-3 border rounded-md resize-none h-24 ${
+                    formData.targetAudience.trim() === "" ? "border-red-300" : "border-gray-300"
+                  }`}
                   value={formData.targetAudience}
                   onChange={(e) => updateFormData('targetAudience', e.target.value)}
                   placeholder="Describe your target audience demographics and interests..."
                 />
               </div>
               <div className="space-y-2">
-                <Label>Influencer Type</Label>
+                <Label>Influencer Type *</Label>
                 <Select 
                   onValueChange={(value) => updateFormData('influencerType', value)}
                   value={formData.influencerType}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={formData.influencerType === "" ? "border-red-300" : ""}>
                     <SelectValue placeholder="Select influencer type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -328,12 +396,12 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Content Type</Label>
+                <Label>Content Type *</Label>
                 <Select 
                   onValueChange={(value) => updateFormData('contentType', value)}
                   value={formData.contentType}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={formData.contentType === "" ? "border-red-300" : ""}>
                     <SelectValue placeholder="Select content type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -431,9 +499,12 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
                 onCheckedChange={(checked) => updateFormData('agreeToTerms', checked)}
               />
               <label htmlFor="terms" className="text-sm">
-                I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>
+                I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a> *
               </label>
             </div>
+            {!formData.agreeToTerms && (
+              <p className="text-sm text-red-600">Please agree to the terms and privacy policy to continue</p>
+            )}
           </div>
         );
 
@@ -487,7 +558,7 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
               <Button 
                 onClick={handleNext} 
                 className="bg-secondary hover:bg-secondary-600"
-                disabled={currentStep === totalSteps && !formData.agreeToTerms}
+                disabled={!isCurrentStepValid()}
               >
                 {currentStep === totalSteps ? (
                   <>
@@ -510,6 +581,3 @@ const BrandOnboarding = ({ userType }: BrandOnboardingProps) => {
 };
 
 export default BrandOnboarding;
-
-
-

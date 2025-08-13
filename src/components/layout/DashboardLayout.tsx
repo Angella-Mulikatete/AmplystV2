@@ -108,7 +108,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
       ...commonItems.slice(0, 1), // Dashboard
       { 
         label: "Discover Influencers", 
-        href: "/brand/discover-influencers", 
+        href: "/influencer/discover", 
         icon: Users,
         description: "Find content creators"
       },
