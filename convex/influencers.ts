@@ -73,7 +73,6 @@ export const filterInfluencers = query({
       });
     }
 
-    console.log("filtered influecers in influencers.ts", filteredInfluencers)
     return filteredInfluencers;
   },
 });
@@ -87,7 +86,6 @@ export const listInfluencers = query({
           .filter((q) => q.eq(q.field("role"), "influencer"))
           .collect();
 
-          console.log("list of influencers", influencers)
         return influencers;
       },
 });

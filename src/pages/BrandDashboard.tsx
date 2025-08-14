@@ -494,13 +494,13 @@ const BrandDashboard = () => {
   const influencers = useQuery(api.influencers.listInfluencers);
   const userRole = useQuery(api.users.getMyRole);
   const applications = useQuery(api.applications.listApplications) as Application[] | undefined;
-  console.log("Applications in the brand dashboard", applications)
-   const [filterNiche, setFilterNiche] = useState('all');
+  const [filterNiche, setFilterNiche] = useState('all');
 
   // Mutations
   const updateCampaign = useMutation(api.campaign.updateCampaign);
   const deleteCampaign = useMutation(api.campaign.deleteCampaign);
   const updateApplication = useMutation(api.applications.updateApplication);
+  const updateBrandProfile = useMutation(api.brands.updateBrandProfile);
 
   // fallback empty arrays for safe .filter() or .map()
   const campaignData = campaigns || [];
@@ -542,15 +542,24 @@ const BrandDashboard = () => {
     setShowEditCampaign(true);
   };
 
+  // const handleEditProfile = () => {
+  //   setEditingProfile({
+  //   companyName: brandProfile?.companyName || '',
+  //   description: brandProfile?.description || '',
+  //   industry: brandProfile?.industry || '',
+  //   location: brandProfile?.location || '',
+  //   website: brandProfile?.website || '',
+  //   businessEmail: brandProfile?.businessEmail || '',
+  //   contactPerson: brandProfile?.contactPerson || '',
+  //   campaignGoal: brandProfile?.campaignGoal || '',
+  //   targetAudience: brandProfile?.targetAudience || '',
+  //   budgetRange: brandProfile?.budgetRange || ''
+  //   });
+  //   setShowEditProfile(true);
+  // };
+
   const handleEditProfile = () => {
-    setEditingProfile({
-      // name: brandProfile.name,
-      description: brandProfile.description,
-      industry: brandProfile.industry,
-      location: brandProfile.location,
-      website: brandProfile.website,
-    });
-    setShowEditProfile(true);
+    navigate('/brand/profile/edit');
   };
 
   const handleDeleteCampaign = async () => {
@@ -592,11 +601,35 @@ const BrandDashboard = () => {
     }
   };
 
-  const handleSaveProfile = () => {
-    // Handle profile update logic here
-    console.log('Saving profile:', editingProfile);
-    setShowEditProfile(false);
+  const handleSaveProfile = async () => {
+    try {
+      await updateBrandProfile({
+        companyName: editingProfile.companyName,
+        industry: editingProfile.industry,
+        contactPerson: editingProfile.contactPerson,
+        businessEmail: editingProfile.businessEmail,
+        location: editingProfile.location,
+        campaignGoal: editingProfile.campaignGoal,
+        targetAudience: editingProfile.targetAudience,
+        budgetRange: editingProfile.budgetRange,
+        description: editingProfile.description,
+      });
+      
+      toast({
+        title: "Profile Updated",
+        description: "Your brand profile has been successfully updated",
+        variant: "success"
+      });
+      setShowEditProfile(false);
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update profile",
+        variant: "destructive"
+      });
+    }
   };
+
 
   const handleApplicationAction = async (applicationId, action) => {
     try {
@@ -720,12 +753,11 @@ const BrandDashboard = () => {
     const matchesSearch = influencer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          influencer.niche.toLowerCase().includes(searchTerm.toLowerCase());
 
-    console.log("matchedSearch in branddashboard", matchesSearch)
    
     const matchesFilter = filterNiche === 'all' || influencer.niche.toLowerCase().includes(filterNiche.toLowerCase());
     return matchesSearch && matchesFilter;
   });
-   console.log("filteredInfuencers in brand", filteredInfluencers)
+
 
   const renderEditProfileModal = () => (
     <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
@@ -735,18 +767,125 @@ const BrandDashboard = () => {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Brand Name</Label>
+            <Label htmlFor="companyName">Company Name *</Label>
             <Input
-              id="name"
-              value={editingProfile?.name || ''}
+              id="companyName"
+              value={editingProfile?.companyName || ''}
               onChange={(e) => setEditingProfile({
                 ...editingProfile,
-                name: e.target.value
+                companyName: e.target.value
               })}
+              placeholder="Enter your company name"
             />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="contactPerson">Contact Person *</Label>
+            <Input
+              id="contactPerson"
+              value={editingProfile?.contactPerson || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                contactPerson: e.target.value
+              })}
+              placeholder="Enter contact person name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="businessEmail">Business Email *</Label>
+            <Input
+              id="businessEmail"
+              type="email"
+              value={editingProfile?.businessEmail || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                businessEmail: e.target.value
+              })}
+              placeholder="Enter business email"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="industry">Industry *</Label>
+            <Input
+              id="industry"
+              value={editingProfile?.industry || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                industry: e.target.value
+              })}
+              placeholder="e.g., Technology, Fashion, Food"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="location">Location *</Label>
+            <Input
+              id="location"
+              value={editingProfile?.location || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                location: e.target.value
+              })}
+              placeholder="Enter your location"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="campaignGoal">Campaign Goal *</Label>
+            <select
+              id="campaignGoal"
+              value={editingProfile?.campaignGoal || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                campaignGoal: e.target.value
+              })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select campaign goal</option>
+              <option value="Brand Awareness">Brand Awareness</option>
+              <option value="Product Launch">Product Launch</option>
+              <option value="Sales Growth">Sales Growth</option>
+              <option value="Community Building">Community Building</option>
+              <option value="Content Creation">Content Creation</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="targetAudience">Target Audience *</Label>
+            <Input
+              id="targetAudience"
+              value={editingProfile?.targetAudience || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                targetAudience: e.target.value
+              })}
+              placeholder="e.g., Young professionals, Tech enthusiasts"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="budgetRange">Budget Range *</Label>
+            <select
+              id="budgetRange"
+              value={editingProfile?.budgetRange || ''}
+              onChange={(e) => setEditingProfile({
+                ...editingProfile,
+                budgetRange: e.target.value
+              })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select budget range</option>
+              <option value="$1,000 - $5,000">$1,000 - $5,000</option>
+              <option value="$5,000 - $15,000">$5,000 - $15,000</option>
+              <option value="$15,000 - $50,000">$15,000 - $50,000</option>
+              <option value="$50,000+">$50,000+</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Company Description</Label>
             <Textarea
               id="description"
               value={editingProfile?.description || ''}
@@ -755,63 +894,38 @@ const BrandDashboard = () => {
                 description: e.target.value
               })}
               rows={4}
+              placeholder="Tell us about your company..."
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="industry">Industry</Label>
-            <Input
-              id="industry"
-              value={editingProfile?.industry || ''}
-              onChange={(e) => setEditingProfile({
-                ...editingProfile,
-                industry: e.target.value
-              })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={editingProfile?.location || ''}
-              onChange={(e) => setEditingProfile({
-                ...editingProfile,
-                location: e.target.value
-              })}
-            />
-          </div>
+
           <div className="space-y-2">
             <Label htmlFor="website">Website</Label>
             <Input
               id="website"
+              type="url"
               value={editingProfile?.website || ''}
               onChange={(e) => setEditingProfile({
                 ...editingProfile,
                 website: e.target.value
               })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              value={editingProfile?.email || ''}
-              onChange={(e) => setEditingProfile({
-                ...editingProfile,
-                email: e.target.value
-              })}
+              placeholder="https://www.yourcompany.com"
             />
           </div>
         </div>
+        
         <div className="flex justify-end gap-4 sticky bottom-0 bg-white pt-4 border-t">
           <Button variant="outline" onClick={() => setShowEditProfile(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            onClick={handleSaveProfile} 
+            className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90"
+            disabled={!editingProfile?.companyName || !editingProfile?.industry || !editingProfile?.contactPerson || !editingProfile?.businessEmail}
+          >
             Update Profile
           </Button>
         </div>
-    </DialogContent>
+      </DialogContent>
     </Dialog>
   );
 
@@ -825,7 +939,10 @@ const BrandDashboard = () => {
               <Building2 className="w-5 h-5" />
               Brand Profile
             </CardTitle>
-            <Button className = "bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90" onClick={handleEditProfile}>
+            <Button 
+              className="bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90" 
+              onClick={handleEditProfile}
+            >
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
@@ -877,7 +994,7 @@ const BrandDashboard = () => {
               <div>
                 <p className="text-sm text-green-600">Total Spend</p>
                 <p className="text-2xl font-bold text-green-700">
-                  ${brandProfile.totalBudget.toLocaleString()}
+                  {brandProfile.totalBudget.toLocaleString()}
                 </p>
               </div>
               <DollarSign className="w-8 h-8 text-green-500" />
@@ -904,7 +1021,9 @@ const BrandDashboard = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Active Campaigns</CardTitle>
-            <Button onClick={() => setActiveTab('campaigns')} className = "bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90">
+            <Button 
+                        onClick={() => navigate('/brand/campaigns/create')}
+              className = "bg-gradient-to-r from-[#3A7CA5] to-[#88B04B] hover:from-[#3A7CA5]/90 hover:to-[#88B04B]/90">
               <Plus className="w-4 h-4 mr-2" />
               Create Campaign
             </Button>
@@ -1072,7 +1191,7 @@ const BrandDashboard = () => {
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-500" />
+                  {/* <DollarSign className="h-5 w-5 text-green-500" /> */}
                   <div>
                     <p className="text-sm text-gray-500">Budget</p>
                     <p className="font-semibold">${campaign.budget.toLocaleString()}</p>
@@ -1149,7 +1268,7 @@ const BrandDashboard = () => {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full flex items-center justify-center text-white font-bold">
                       {application.influencerName.charAt(0)}
                     </div>
                     <div className="flex-1">

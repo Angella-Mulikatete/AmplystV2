@@ -199,8 +199,8 @@ const CampaignDiscovery = ({ campaigns, profile }: CampaignDiscoveryProps) => {
               
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-[#88B04B]" />
-                  <span className="font-medium text-[#88B04B]">{campaign.budget ? `$${campaign.budget}` : "N/A"}</span>
+                  {/* <DollarSign className="h-4 w-4 text-[#88B04B]" /> */}
+                  <span className="font-medium text-[#88B04B]">{campaign.budget ? `${campaign.budget}` : "N/A"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-[#E19629]" />

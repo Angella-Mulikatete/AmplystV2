@@ -110,18 +110,21 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         label: "Discover Influencers", 
         href: "/influencer/discover", 
         icon: Users,
+        tabValue: "discover",
         description: "Find content creators"
       },
       { 
         label: "Campaigns", 
         href: "/brand/campaigns", 
         icon: Target,
+        tabValue: "brands",
         description: "Manage your campaigns"
       },
       { 
         label: "Applications", 
         href: "/brand/applications", 
         icon: Briefcase,
+        tabValue: "applications",
         description: "Review applications"
       },
       { 
@@ -290,6 +293,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
   };
 
   return (
+    
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
       {/* Mobile/Tablet Sidebar Overlay */}
       {(isMobile || isTablet) && sidebarOpen && (
@@ -313,7 +317,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         {/* Mobile/Tablet Close Button */}
         {(isMobile || isTablet) && (
           <div className="flex justify-between items-center p-6 border-b border-gray-200/50 bg-gradient-to-r from-primary-50 to-primary-100/50 flex-shrink-0">
-            <div className="font-bold text-gray-800 text-lg">Navigation</div>
+            <div className="font-bold text-gray-800 text-lg">Amplyst</div>
             <Button
               variant="ghost"
               size="sm"

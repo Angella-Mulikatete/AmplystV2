@@ -21,10 +21,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 const objectives = [
   "Brand Awareness",
@@ -58,6 +59,7 @@ export default function CampaignCreation() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const createCampaign = useMutation(api.campaign.createCampaign);
+  const userRole = useQuery(api.users.getMyRole);
 
   const [campaignData, setCampaignData] = useState({
     name: "",
@@ -396,79 +398,84 @@ export default function CampaignCreation() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-primary-800">Create New Campaign</h1>
-        <p className="text-gray-600 mt-1">Set up your influencer marketing campaign in just a few steps</p>
-      </div>
+    <DashboardLayout 
+      userRole={userRole || "brand"}
+    >
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-primary-800">Create New Campaign</h1>
+          <p className="text-gray-600 mt-1">Set up your influencer marketing campaign in just a few steps</p>
+        </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center">
-                <div className={`flex items-center gap-3 ${
-                  step.number <= currentStep ? 'text-primary' : 'text-gray-400'
-                }`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    step.number <= currentStep 
-                      ? 'bg-primary text-white' 
-                      : 'bg-gray-200 text-gray-500'
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              {steps.map((step, index) => (
+                <div key={step.number} className="flex items-center">
+                  <div className={`flex items-center gap-3 ${
+                    step.number <= currentStep ? 'text-primary' : 'text-gray-400'
                   }`}>
-                    <step.icon className="w-5 h-5" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      step.number <= currentStep 
+                        ? 'bg-primary text-white' 
+                        : 'bg-gray-200 text-gray-500'
+                    }`}>
+                      <step.icon className="w-5 h-5" />
+                    </div>
+                    <div className="hidden md:block">
+                      <p className="font-medium">{step.title}</p>
+                      <p className="text-sm opacity-75">Step {step.number}</p>
+                    </div>
                   </div>
-                  <div className="hidden md:block">
-                    <p className="font-medium">{step.title}</p>
-                    <p className="text-sm opacity-75">Step {step.number}</p>
-                  </div>
+                  {index < steps.length - 1 && (
+                    <div className={`w-12 h-px mx-4 ${
+                      step.number < currentStep ? 'bg-primary' : 'bg-gray-300'
+                    }`} />
+                  )}
                 </div>
-                {index < steps.length - 1 && (
-                  <div className={`w-12 h-px mx-4 ${
-                    step.number < currentStep ? 'bg-primary' : 'bg-gray-300'
-                  }`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{steps.find(s => s.number === currentStep)?.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          {renderCurrentStep()}
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{steps.find(s => s.number === currentStep)?.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {renderCurrentStep()}
+          </CardContent>
+        </Card>
 
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-          disabled={currentStep === 1 || loading}
-        >
-          Previous
-        </Button>
-        {currentStep < 4 ? (
+        <div className="flex justify-between">
           <Button
-            onClick={() => setCurrentStep(Math.min(4, currentStep + 1))}
-            className="bg-primary hover:bg-primary-600"
-            disabled={loading}
+            variant="outline"
+            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+            disabled={currentStep === 1 || loading}
           >
-            Next Step
+            Previous
           </Button>
-        ) : (
-          <Button
-            className="bg-secondary hover:bg-secondary-600"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? "Launching..." : "Launch Campaign"}
-          </Button>
-        )}
+          {currentStep < 4 ? (
+            <Button
+              onClick={() => setCurrentStep(Math.min(4, currentStep + 1))}
+              className="bg-primary hover:bg-primary-600"
+              disabled={loading}
+            >
+              Next Step
+            </Button>
+          ) : (
+            <Button
+              className="bg-secondary hover:bg-secondary-600"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Launching..." : "Launch Campaign"}
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
+
   );
 }
 

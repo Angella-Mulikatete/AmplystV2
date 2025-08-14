@@ -73,8 +73,6 @@ export const getMyBrandProfile = query({
       .withIndex("by_email", (q) => q.eq("email", identity.email!))
       .first();
 
-      console.log("user in brand.ts", user);
-
     if (!user) return null;
 
     return await ctx.db
@@ -95,6 +93,7 @@ export const updateBrandProfile = mutation({
     targetAudience: v.string(),
     budgetRange: v.string(),
     description: v.optional(v.string()),
+    website: v.optional(v.string()), 
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -102,15 +101,24 @@ export const updateBrandProfile = mutation({
       throw new Error("Not authenticated");
     }
 
-    const userId = identity.subject;
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", identity.email!))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
     const brandProfile = await ctx.db
       .query("brands")
-      .filter((q) => q.eq(q.field("userId"), userId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
       .first();
+
+    console.log("Brand profile", brandProfile)
 
     if (!brandProfile) {
       const newProfileId = await ctx.db.insert("brands", {
-        userId: userId as Id<"users">,
+        userId: user._id as Id<"users">,
         companyName: args.companyName,
         industry: args.industry,
         contactPerson: args.contactPerson,
