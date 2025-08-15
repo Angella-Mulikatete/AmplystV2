@@ -100,6 +100,20 @@ export const getInfluencerProfileByUserId = query({
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("role"), "influencer"))
       .collect();
+
+    console.log("Profile in influencers.ts", [profile])
+    return profile ?? null;
+  },
+});
+
+// In your Convex functions
+export const getInfluencerProfileById = query({
+  args: {
+    profileId: v.id("profiles"), // or whatever table your influencers are in
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db.get(args.profileId);
+    console.log("profile in influencer function", profile)
     return profile ?? null;
   },
 });
