@@ -4,8 +4,8 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { api } from "./_generated/api";
 
-  export const createCampaign = mutation({
-      args: {
+export const createCampaign = mutation({
+    args: {
         role: v.union(
           v.literal("influencer"),
           v.literal("brand"),
@@ -27,77 +27,196 @@ import { api } from "./_generated/api";
         endDate: v.optional(v.string()),
         duration: v.optional(v.string()),
         requirements: v.optional(v.string()),
-      },
-      handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        console.log("Creating campaign with args:", args);
+    },
+    
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    console.log("Creating campaign with args:", args);
 
-        if (!identity) throw new Error("Not authenticated");
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
 
-        let user = await ctx.db
-          .query("users")
-          .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
-          .unique();
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+
+    // If user doesn't exist, create them
+    if (!user) {
+      console.log("User not found, creating new user");
+      const newUserId = await ctx.db.insert("users", {
+        tokenIdentifier: identity.tokenIdentifier,
+        email: identity.email!,
+        role: args.role,
+      });
+
+      console.log("New user created in campaign with ID:", newUserId);
+
+      user = await ctx.db.get(newUserId);
+      if (!user) {
+        throw new Error("Failed to retrieve newly created user");
+      }
+    }
+
+    console.log("Creating campaign for user:", user._id);
+
+    // Create the campaign with all the fields
+    const campaignId = await ctx.db.insert("campaigns", {
+      creatorUserId: user._id,
+      ...args,
+    });
+
+    console.log("Campaign created successfully with ID:", campaignId);
+    return campaignId;
+  },
+});
+
+
+// export const createCampaign = mutation({
+  //     args: {
+  //       role: v.union(
+  //         v.literal("influencer"),
+  //         v.literal("brand"),
+  //         v.literal("agency"),
+  //       ),
+  //       title: v.string(),
+  //       description: v.string(),
+  //       budget: v.optional(v.number()),
+  //       status: v.union(
+  //         v.literal("draft"),
+  //         v.literal("active"),
+  //         v.literal("completed"),
+  //         v.literal("archived"),
+  //         v.literal("expired")
+  //       ),
+  //       targetAudience: v.optional(v.string()),
+  //       contentTypes: v.optional(v.array(v.string())),
+  //       startDate: v.optional(v.string()),
+  //       endDate: v.optional(v.string()),
+  //       duration: v.optional(v.string()),
+  //       requirements: v.optional(v.string()),
+  //     },
+  //     handler: async (ctx, args) => {
+  //       const identity = await ctx.auth.getUserIdentity();
+  //       console.log("Creating campaign with args:", args);
+
+  //       if (!identity) throw new Error("Not authenticated");
+
+  //       let user = await ctx.db
+  //         .query("users")
+  //         .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+  //         .unique();
        
 
-         // 3. If user doesn't exist, create them
-        if (!user) {
-          const newUserId = await ctx.db.insert("users", {
-            tokenIdentifier: identity.tokenIdentifier,
-            email: identity.email!,
-            role: args.role,
-          });
+  //        // 3. If user doesn't exist, create them
+  //       if (!user) {
+  //         const newUserId = await ctx.db.insert("users", {
+  //           tokenIdentifier: identity.tokenIdentifier,
+  //           email: identity.email!,
+  //           role: args.role,
+  //         });
 
-          console.log("New user created in campaign with ID:", newUserId);
+  //         console.log("New user created in campaign with ID:", newUserId);
 
-          user = await ctx.db.get(newUserId);
-          if (!user) {
-            throw new Error("Failed to retrieve newly created user");
-          }
-        }
+  //         user = await ctx.db.get(newUserId);
+  //         if (!user) {
+  //           throw new Error("Failed to retrieve newly created user");
+  //         }
+  //       }
 
-       // if (!user) throw new Error("User not found");
+  //      // if (!user) throw new Error("User not found");
 
-        return await ctx.db.insert("campaigns", {
-          creatorUserId: user._id,
-          ...args,
-        });
-      },
-    });
+  //       return await ctx.db.insert("campaigns", {
+  //         creatorUserId: user._id,
+  //         ...args,
+  //       });
+  //     },
+  // });
+
+  // export const listMyCampaigns = query({
+  //   args: {
+  //     includeExpired: v.optional(v.boolean()),
+  //   },
+  //   handler: async (ctx, args) => {
+
+  //     const identity = await ctx.auth.getUserIdentity();
+  //     if (!identity) {
+  //       console.log("No identity found");
+  //       return []; // Return empty array instead of throwing
+  //     }
+
+  //     // Find the user
+  //     const user = await ctx.db
+  //       .query("users")
+  //       .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
+  //       .unique();
+
+  //     if (!user) {
+  //       console.log("User not found");
+  //       return []; // Return empty array if user doesn't exist
+  //     }
+
+  //     const campaigns = await ctx.db
+  //       .query("campaigns")
+  //       .withIndex("by_creatorUserId", (q) => q.eq("creatorUserId", user._id))
+  //       .filter((q) => 
+  //         args.includeExpired 
+  //           ? q.eq(q.field("status"), q.field("status")) // Always true
+  //           : q.neq(q.field("status"), "expired")
+  //       )
+  //       .collect();
+
+  //     return campaigns;
+  //   },
+  // });
 
   export const listMyCampaigns = query({
     args: {
       includeExpired: v.optional(v.boolean()),
     },
     handler: async (ctx, args) => {
+      // Wait a bit for auth to be established
       const identity = await ctx.auth.getUserIdentity();
+      
       if (!identity) {
-        console.log("No identity found");
-        return []; // Return empty array instead of throwing
+        console.log("No identity found - user may not be authenticated");
+        throw new Error("Authentication required to fetch campaigns");
       }
 
-      // Find the user
+      console.log("Identity found:", identity.tokenIdentifier);
+
+      // Find the user with better error handling
       const user = await ctx.db
         .query("users")
         .withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier))
         .unique();
 
       if (!user) {
-        console.log("User not found");
-        return []; // Return empty array if user doesn't exist
+        console.log("User not found for token:", identity.tokenIdentifier);
+        // This might indicate the user hasn't completed registration
+        throw new Error("User profile not found. Please complete your registration.");
       }
 
-      const campaigns = await ctx.db
-        .query("campaigns")
-        .withIndex("by_creatorUserId", (q) => q.eq("creatorUserId", user._id))
-        .filter((q) => 
-          args.includeExpired 
-            ? q.eq(q.field("status"), q.field("status")) // Always true
-            : q.neq(q.field("status"), "expired")
-        )
-        .collect();
+      console.log("User found:", user._id);
 
-      return campaigns;
+      try {
+        const campaigns = await ctx.db
+          .query("campaigns")
+          .withIndex("by_creatorUserId", (q) => q.eq("creatorUserId", user._id))
+          .filter((q) => 
+            args.includeExpired 
+              ? q.eq(q.field("status"), q.field("status")) // Always true
+              : q.neq(q.field("status"), "expired")
+          )
+          .collect();
+
+        console.log(`Found ${campaigns.length} campaigns for user ${user._id}`);
+        return campaigns;
+      } catch (error) {
+        console.error("Error fetching campaigns:", error);
+        throw new Error("Failed to fetch campaigns");
+      }
     },
   });
 

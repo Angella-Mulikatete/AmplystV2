@@ -16,10 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { SignedIn } from "@clerk/clerk-react";
-import CampaignDiscovery from "@/components/campaignDiscovery";
-import BrandDiscovery from "@/components/influencer/BrandDiscovery";
-import { profile } from "console";
-import { allCampaigns } from "convex/campaign";
 
 interface Application {
   _id: string;
@@ -52,6 +48,7 @@ const BrandDashboard = () => {
   // Real-time data fetching
   const brandProfile = useQuery(api.brands.getMyBrandProfile);
   const campaigns = useQuery(api.campaign.listMyCampaigns, { includeExpired: false });
+  // const campaigns = useQuery(api.campaign.allCampaigns);
   console.log("campaigns in branddashboard", campaigns)
   const influencers = useQuery(api.influencers.listInfluencers);
   const userRole = useQuery(api.users.getMyRole);
@@ -592,36 +589,6 @@ const BrandDashboard = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Stats Cards */}
-      {/* <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-green-600">Total Spend</p>
-                <p className="text-2xl font-bold text-green-700">
-                  {brandProfile.totalBudget.toLocaleString()}
-                </p>
-              </div>
-              <DollarSign className="w-8 h-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600">Active Campaigns</p>
-                <p className="text-2xl font-bold text-blue-700">
-                  {brandProfile.activeCampaigns}
-                </p>
-              </div>
-              <Target className="w-8 h-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div> */}
 
       {/* Active Campaigns */}
       <Card>

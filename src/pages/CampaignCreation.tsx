@@ -32,8 +32,7 @@ import { toast } from "@/components/ui/use-toast";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import React from "react";
-
-
+import { updateCampaign } from "convex/campaign";
 
 
 const objectives = [
@@ -55,6 +54,20 @@ const contentTypes = [
   "Tweet",
   "LinkedIn Post"
 ];
+
+type CreateCampaignArgs = {
+  role: "influencer" | "brand" | "agency";
+  title: string;
+  description: string;
+  budget?: number;
+  status: "draft" | "active" | "completed" | "archived" | "expired";
+  targetAudience?: string;
+  contentTypes?: string[];
+  startDate?: string;
+  endDate?: string;
+  duration?: string;
+  requirements?: string;
+};
 
 const steps = [
   { number: 1, title: "Campaign Details", icon: Briefcase },
@@ -88,9 +101,11 @@ export default function CampaignCreation({
     initialData?.status || CAMPAIGN_STATUS.DRAFT
   );
 
+  const createCampaign = useMutation(api.campaign.createCampaign);
   // Check if campaign can be edited
   const canEditCampaign = !isEditing || (campaignStatus !== CAMPAIGN_STATUS.LAUNCHED && campaignStatus !== CAMPAIGN_STATUS.COMPLETED);
-  
+  const updateCampaign = useMutation(api.campaign.updateCampaign); 
+
   // Check if specific fields can be edited (some fields might be locked even in non-launched campaigns)
   const canEditCriticalFields = campaignStatus === CAMPAIGN_STATUS.DRAFT;
 
@@ -547,18 +562,75 @@ export default function CampaignCreation({
 
   // Submit handler
   const handleSubmit = async () => {
+
+    if (!canEditCampaign) {
+      toast({
+        title: "Cannot Save",
+        description: "This campaign cannot be modified in its current state",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      if (isEditing) {
-        await onSave(campaignId, campaignData);
-        console.log("Campaign updated:", campaignData);
+
+      const campaignPayload : CreateCampaignArgs = {
+        role: "brand", 
+        title: campaignData.name, // Your API expects 'title', component uses 'name'
+        description: campaignData.description,
+        budget: campaignData.budget ? parseInt(campaignData.budget) : undefined,
+        status: campaignStatus,
+        targetAudience: `Age: ${campaignData.targetAudience.ageRange}, Location: ${campaignData.targetAudience.location}`, // Convert object to string
+        contentTypes: campaignData.contentTypes,
+        startDate: campaignData.startDate ? campaignData.startDate.toISOString() : undefined,
+        endDate: campaignData.endDate ? campaignData.endDate.toISOString() : undefined,
+        requirements: campaignData.deliverables || campaignData.brandGuidelines,
+
+      };
+
+      console.log("Submitting campaign payload:", campaignPayload);
+
+
+      // if (isEditing) {
+      //   await onSave(campaignId, campaignData);
+      //   console.log("Campaign updated:", campaignData);
+      // } else {
+      //   await onSave(null, campaignData);
+      //   console.log("Campaign created:", campaignData);
+      // }
+
+      if (isEditing && campaignId) {
+          // Update existing campaign
+          await updateCampaign({
+                campaignId,
+                ...campaignPayload
+        });
+
+        toast({
+          title: "Campaign Updated",
+          description: `${campaignData.name} has been updated successfully`,
+          variant: "success"
+          });
       } else {
-        await onSave(null, campaignData);
-        console.log("Campaign created:", campaignData);
-      }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+              // Create new campaign
+          const newCampaignId = await createCampaign(campaignPayload);
+              
+          toast({
+                title: "Campaign Created",
+                description: `${campaignData.name} has been created successfully`,
+                variant: "success"
+          });
+              
+              console.log("New campaign created with ID:", newCampaignId);
+            }
+
+           
+            await onSave(campaignId, campaignData);
+            
+            // Navigate back to dashboard
+            navigate("/brand/dashboard");
+   
       alert(isEditing ? "Campaign updated successfully!" : "Campaign created successfully!");
     } catch (error) {
       console.error("Error saving campaign:", error);

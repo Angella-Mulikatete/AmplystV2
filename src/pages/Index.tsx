@@ -526,7 +526,6 @@ const Index = () => {
       </section>
 
       {/* Influencer Section */}
-
       <section className="w-full bg-gradient-to-br from-pink-50 to-orange-50 relative overflow-hidden">
         <div className="container mx-auto py-20 px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -784,92 +783,10 @@ const Index = () => {
               </AnimatePresence>
             </div>
 
-            {/* Navigation Dots */}
-            {/* <div className="flex justify-center space-x-3 mt-6">
-              {contentBlocks.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                    index === currentIndex ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-            </div> */}
+
           </div>
         </div>
       </section>
-
-      {/* Features Section */}
-      {/* <section id="features" className="py-16 px-4 bg-gray-50">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Key Features
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <Zap className="h-8 w-8 text-[#3A7CA5] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Smart Matching
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                AI-powered matching ensures you find the perfect collaborations.
-              </CardDescription>
-            </Card>
-
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <Target className="h-8 w-8 text-[#E19629] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Targeted Campaigns
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Reach your ideal audience with precision targeting.
-              </CardDescription>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <BarChart3 className="h-8 w-8 text-[#88B04B] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Performance Tracking
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Monitor your campaign's success with detailed analytics.
-              </CardDescription>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <Shield className="h-8 w-8 text-[#3A7CA5] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Secure Payments
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Hassle-free and secure payment processing for all transactions.
-              </CardDescription>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <CheckCircle className="h-8 w-8 text-[#E19629] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Verified Influencers
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Collaborate with trusted and verified creators.
-              </CardDescription>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <MessageSquare className="h-8 w-8 text-[#88B04B] mb-4 mx-auto" />
-              <CardTitle className="text-xl font-semibold text-gray-900">
-                Direct Communication
-              </CardTitle>
-              <CardDescription className="text-gray-600">
-                Seamlessly communicate with brands and influencers.
-              </CardDescription>
-            </Card>
-          </div>
-        </div>
-      </section> */}
 
       <section id="features" className="py-12 md:py-16 lg:py-20 px-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       {/* Background decorative elements */}
@@ -1127,7 +1044,6 @@ const Index = () => {
       </section>
 
       {/* Success Stories Section */}
-
       <section id="success-stories" className="py-12 md:py-16 lg:py-20 px-4 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto max-w-7xl">
           {/* Header */}
