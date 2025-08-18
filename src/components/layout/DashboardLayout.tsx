@@ -93,7 +93,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         href: `/${userRole}/messages`, 
         icon: MessageSquare,
         description: "Chat and communications",
-        comingSoon: true
+        // comingSoon: true
       },
       { 
         label: "Settings", 
@@ -171,7 +171,7 @@ const DashboardLayout = ({ children, userRole = "brand", userName = "Brand Co", 
         href: "/influencer/messages", 
         icon: MessageSquare,
         description: "Chat and communications",
-        comingSoon: true
+        // comingSoon: true
       },
       { 
         label: "Settings", 

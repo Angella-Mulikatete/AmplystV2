@@ -127,12 +127,24 @@ const applicationTables = {
     .index("by_brand", ["brandId"]),
 
   // Messaging
-  messages :defineTable({
+  messages: defineTable({
     conversationId: v.id("conversations"),
     senderUserId: v.id("users"),
     content: v.string(),
-    sentAt: v.string(),
-  }).index("by_conversationId", ["conversationId"]),
+    sentAt: v.number(),
+    readBy: v.optional(v.array(v.id("users"))),
+  }).index("by_conversationId", ["conversationId"])
+    .index("by_sentAt", ["sentAt"]),
+
+
+  conversations: defineTable({
+    participantIds: v.array(v.id("users")),
+    lastMessageAt: v.number(),
+    lastMessage: v.optional(v.string()),
+    lastMessageSenderId: v.optional(v.id("users")),
+    })
+      .index("by_participant", ["participantIds"])
+      .index("by_lastMessageAt", ["lastMessageAt"]),
 
   // Analytics
   analytics : defineTable({

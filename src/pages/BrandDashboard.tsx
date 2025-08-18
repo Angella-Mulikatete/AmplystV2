@@ -303,12 +303,44 @@ const BrandDashboard = () => {
     </Dialog>
   );
 
-  const handleApproveApplication = (applicationId) => {
-    console.log('Approving application:', applicationId);
+  const handleApproveApplication = async (applicationId) => {
+    try {
+      await updateApplication({
+        applicationId,
+        status: 'approved'
+      });
+      toast({
+        title: "Application Approved",
+        description: "The application has been approved successfully",
+        variant: "success"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve application",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleRejectApplication = (applicationId) => {
-    console.log('Rejecting application:', applicationId);
+  const handleRejectApplication = async (applicationId) => {
+    try {
+      await updateApplication({
+        applicationId,
+        status: 'rejected'
+      });
+      toast({
+        title: "Application Rejected",
+        description: "The application has been rejected",
+        variant: "success"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reject application",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredInfluencers = influencerData.filter(influencer => {
@@ -1050,102 +1082,115 @@ const BrandDashboard = () => {
     );
   };
 
+
   const renderApplications = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Campaign Applications</CardTitle>
-        <p className="text-sm text-gray-500 mt-1">
-          Review and manage influencer applications for your campaigns
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {applications?.length > 0 ? (
-            applications.map((application) => (
-              <div 
-                key={application._id}
-                className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full flex items-center justify-center text-white font-bold">
-                      {application.influencerName.charAt(0)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{application.influencerName}</h3>
-                      <p className="text-sm text-gray-600">{application.campaignTitle}</p>
-                      <p className="text-sm text-gray-500 mt-1">{application.message}</p>
-                      
-                      {/* <div className="flex items-center gap-4 mt-3 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4 text-gray-500" />
-                          <span>{application.followers.toLocaleString()} followers</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-500" />
-                          <span>{application.engagement}% engagement</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-green-500" />
-                          <span>${application.proposedRate}</span>
-                        </div>
-                      </div> */}
-                    </div>
+  <Card>
+    <CardHeader>
+      <CardTitle>Campaign Applications</CardTitle>
+      <p className="text-sm text-gray-500 mt-1">
+        Review and manage influencer applications for your campaigns
+      </p>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-6">
+        {applications?.length > 0 ? (
+          applications.map((application) => (
+            <div
+              key={application._id}
+              className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                {/* Left section: Influencer info */}
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                    {application.influencerName?.charAt(0) || "?"}
                   </div>
-                  
-                  <div className="flex flex-col items-end gap-2">
-                    <Badge 
-                      variant={
-                        application.status === 'pending' ? 'secondary' :
-                        application.status === 'approved' ? 'default' :
-                        'destructive'
-                      }
-                      className={
-                        application.status === 'approved' ? 'bg-green-100 text-green-800' : ''
-                      }
-                    >
-                      {application.status}
-                    </Badge>
-                    {/* <span className="text-sm text-gray-500">
-                      {new Date(application.appliedDate).toLocaleDateString()}
-                    </span> */}
-                    
-                    {application.status === 'pending' && (
-                      <div className="flex gap-2 mt-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleRejectApplication(application._id)}
-                          className="text-red-600 border-red-300 hover:bg-red-50"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleApproveApplication(application._id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                      </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate">
+                      <span className="font-medium text-gray-700">Influencer Name: </span>
+                      {application.influencerName || "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-600 truncate">
+                      <span className="font-medium text-gray-700">Campaign: </span>
+                      {application.campaignTitle || "N/A"}
+                    </p>
+                    {application.message && (
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-3 break-words">
+                      <span className="font-medium text-gray-700">Message: </span>
+                      {application.message}
+                    </p>
+                    )}
+                    {application.proposedContent && (
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-3 break-words">
+                      <span className="font-medium text-gray-700">Proposed Content: </span>
+                      {application.proposedContent}
+                    </p>
                     )}
                   </div>
                 </div>
+
+                {/* Right section: Status and actions */}
+                <div className="flex flex-col items-start sm:items-end gap-2">
+                  <Badge
+                    variant={
+                      application.status === "pending"
+                        ? "secondary"
+                        : application.status === "approved"
+                        ? "default"
+                        : "destructive"
+                    }
+                    className={
+                      application.status === "approved"
+                        ? "bg-green-100 text-green-800"
+                        : ""
+                    }
+                  >
+                    {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                  </Badge>
+
+                  {application.status === "pending" && (
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRejectApplication(application._id)}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleApproveApplication(application._id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Approve
+                      </Button>
+                    </div>
+                  )}
+                  {application.status !== "pending" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {application.status === "approved" ? "Approved" : "Rejected"} application
+                    </p>
+                  )}  
+                </div>
               </div>
-            ))
-          ) : (
-            <div className="text-center py-8">
-              <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
-              <p className="text-gray-600">Campaign applications will appear here when influencers apply</p>
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
+            <p className="text-gray-600">
+              Campaign applications will appear here when influencers apply
+            </p>
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
 
   const renderApplicationModal = () => (
     <Dialog open={showApplicationModal} onOpenChange={setShowApplicationModal}>

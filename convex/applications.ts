@@ -38,6 +38,8 @@ export const listApplications = query({
       .filter((q) => q.eq(q.field("brandId"), brandProfile._id))
       .collect();
 
+      // console.log("Applications in applications.ts", applications)
+
     // Get additional details for each application
     const applicationsWithDetails = await Promise.all(
       applications.map(async (application) => {

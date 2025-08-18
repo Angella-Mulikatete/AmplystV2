@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, Edit, Target, MessageSquare, Star, Calendar, Clock, CheckCircle, Users } from "lucide-react";
+import { DollarSign, Edit, Target, MessageSquare, Star, Calendar, Clock, CheckCircle, Users, Play, Search, XCircle } from "lucide-react";
 import CampaignDiscovery from "@/components/influencer/CampaignDiscovery";
 import BrandDiscovery from "@/components/influencer/BrandDiscovery";
 import MyApplications from "@/components/influencer/MyApplications";
@@ -509,6 +509,63 @@ const InfluencerDashboard = () => {
     </div>
   );
 
+  // const renderApplications = () => (
+  //   <Card>
+  //     <CardHeader>
+  //       <CardTitle>My Applications</CardTitle>
+  //       <p className="text-sm text-gray-500 mt-1">
+  //         Track the status of your campaign applications
+  //       </p>
+  //     </CardHeader>
+  //     <CardContent>
+  //       <div className="space-y-4">
+  //         {applications?.length > 0 ? (
+  //           applications.map((application) => (
+  //             <div 
+  //               key={application._id}
+  //               className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+  //             >
+  //               <div className="flex-1">
+  //                 <div className="flex items-center gap-4">
+  //                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+  //                     {application.campaignTitle?.charAt(0)}
+  //                   </div>
+  //                   <div>
+  //                     <h3 className="font-semibold">{application.campaignTitle}</h3>
+  //                     <p className="text-sm text-gray-600">{application.influencerName}</p>
+  //                     <div className="flex items-center gap-2 mt-1">
+  //                       <Badge 
+  //                         variant={
+  //                           application.status === 'pending' ? 'secondary' :
+  //                           application.status === 'approved' ? 'default' :
+  //                           'destructive'
+  //                         }
+  //                       >
+  //                         {application.status}
+  //                       </Badge>
+  //                       <span className="text-sm text-gray-500">
+  //                         {new Date(application._creationTime).toLocaleDateString()}
+  //                       </span>
+  //                     </div>
+  //                   </div>
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           ))
+  //         ) : (
+  //           <div className="text-center py-8">
+  //             <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+  //             <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
+  //             <p className="text-gray-600">Your campaign applications will appear here</p>
+  //           </div>
+  //         )}
+  //       </div>
+  //     </CardContent>
+  //   </Card>
+  // );
+
+// Enhanced renderApplications function for InfluencerDashboard
+
   const renderApplications = () => (
     <Card>
       <CardHeader>
@@ -516,53 +573,170 @@ const InfluencerDashboard = () => {
         <p className="text-sm text-gray-500 mt-1">
           Track the status of your campaign applications
         </p>
+        <div className="flex gap-4 mt-4">
+          <div className="text-sm">
+            <span className="font-medium">Total: </span>
+            <span className="text-gray-600">{applications?.length || 0}</span>
+          </div>
+          <div className="text-sm">
+            <span className="font-medium">Pending: </span>
+            <span className="text-yellow-600">
+              {applications?.filter(app => app.status === 'pending').length || 0}
+            </span>
+          </div>
+          <div className="text-sm">
+            <span className="font-medium">Approved: </span>
+            <span className="text-green-600">
+              {applications?.filter(app => app.status === 'approved').length || 0}
+            </span>
+          </div>
+          <div className="text-sm">
+            <span className="font-medium">Rejected: </span>
+            <span className="text-red-600">
+              {applications?.filter(app => app.status === 'rejected').length || 0}
+            </span>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {applications?.length > 0 ? (
-            applications.map((application) => (
-              <div 
-                key={application._id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      {application.campaignTitle?.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{application.campaignTitle}</h3>
-                      <p className="text-sm text-gray-600">{application.influencerName}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          variant={
-                            application.status === 'pending' ? 'secondary' :
-                            application.status === 'approved' ? 'default' :
-                            'destructive'
-                          }
-                        >
-                          {application.status}
-                        </Badge>
-                        <span className="text-sm text-gray-500">
-                          {new Date(application._creationTime).toLocaleDateString()}
-                        </span>
+            applications
+              .sort((a, b) => {
+                // Sort by status priority: pending first, then approved, then rejected
+                const statusPriority = { pending: 0, approved: 1, rejected: 2 };
+                if (statusPriority[a.status] !== statusPriority[b.status]) {
+                  return statusPriority[a.status] - statusPriority[b.status];
+                }
+                // Then sort by creation time (newest first)
+                return b._creationTime - a._creationTime;
+              })
+              .map((application) => (
+                <motion.div 
+                  key={application._id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                        {application.campaignTitle?.charAt(0) || "C"}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">{application.campaignTitle}</h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          Applied by: {application.influencerName}
+                        </p>
+                        
+                        {/* Application details */}
+                        {application.message && (
+                          <p className="text-sm text-gray-500 mb-2 line-clamp-2">
+                            <span className="font-medium">Message: </span>
+                            {application.message}
+                          </p>
+                        )}
+                        
+                        {application.proposedContent && (
+                          <p className="text-sm text-gray-500 mb-2 line-clamp-2">
+                            <span className="font-medium">Proposed Content: </span>
+                            {application.proposedContent}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-4 mt-3">
+                          <Badge 
+                            variant={
+                              application.status === 'pending' ? 'secondary' :
+                              application.status === 'approved' ? 'default' :
+                              'destructive'
+                            }
+                            className={
+                              application.status === 'approved' 
+                                ? 'bg-green-100 text-green-800 border-green-200' 
+                                : application.status === 'rejected'
+                                ? 'bg-red-100 text-red-800 border-red-200'
+                                : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                            }
+                          >
+                            <div className="flex items-center gap-1">
+                              {application.status === 'approved' && <CheckCircle className="w-3 h-3" />}
+                              {application.status === 'rejected' && <XCircle className="w-3 h-3" />}
+                              {application.status === 'pending' && <Clock className="w-3 h-3" />}
+                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                            </div>
+                          </Badge>
+                          
+                          <span className="text-sm text-gray-500 flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            Applied: {new Date(application._creationTime).toLocaleDateString()}
+                          </span>
+                        </div>
+                        
+                        {/* Status-specific messages */}
+                        {application.status === 'approved' && (
+                          <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-sm text-green-800 flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              Congratulations! Your application has been approved. You can now start working on this campaign.
+                            </p>
+                          </div>
+                        )}
+                        
+                        {application.status === 'rejected' && (
+                          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm text-red-800 flex items-center gap-2">
+                              <XCircle className="w-4 h-4" />
+                              Your application was not selected for this campaign. Keep applying to other opportunities!
+                            </p>
+                          </div>
+                        )}
+                        
+                        {application.status === 'pending' && (
+                          <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <p className="text-sm text-yellow-800 flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              Your application is under review. We'll notify you once there's an update.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))
+                  
+                  {/* Action buttons for approved applications */}
+                  {application.status === 'approved' && (
+                    <div className="flex flex-col gap-2">
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Play className="w-4 h-4 mr-1" />
+                        Start Campaign
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        Contact Brand
+                      </Button>
+                    </div>
+                  )}
+                </motion.div>
+              ))
           ) : (
             <div className="text-center py-8">
               <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
-              <p className="text-gray-600">Your campaign applications will appear here</p>
+              <p className="text-gray-600 mb-4">Your campaign applications will appear here</p>
+              <Button onClick={() => setActiveTab('discover')} className="bg-primary-600 hover:bg-primary-700">
+                <Search className="w-4 h-4 mr-2" />
+                Discover Campaigns
+              </Button>
             </div>
           )}
         </div>
       </CardContent>
     </Card>
   );
+
+
 
   return (
     <SignedIn>
